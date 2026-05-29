@@ -1,0 +1,122 @@
+plugins {
+    id 'java'
+    id 'net.neoforged.moddev.legacyforge'
+    id 'maven-publish'
+}
+
+group = group_id
+version = mod_version
+
+base {
+    archivesName = archives_name
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+def mwePackagesUrl = "https://maven.pkg.github.com/${mwe_packages_owner}/${mwe_packages_repository}"
+def fgePackagesUrl = "https://maven.pkg.github.com/${github_packages_owner}/${github_packages_repository}"
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net'
+    }
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    maven {
+        name = 'GitHubPackagesMinecraftWebExport'
+        url = uri(mwePackagesUrl)
+        credentials {
+            username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+            password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.13.1'
+
+    compileOnly("maven.modrinth:patchouli:${patchouli_version}") { transitive = false }
+    modRuntimeOnly("maven.modrinth:patchouli:${patchouli_version}") { transitive = false }
+
+    // Phase 3: scoped EMI via minecraft-web-export ExportModule
+    // modCompileOnly fg.deobf("${mwe_group_id}:${mwe_artifact_id}:${mwe_version}")
+    // modRuntimeOnly fg.deobf("${mwe_group_id}:${mwe_artifact_id}:${mwe_version}")
+}
+
+legacyForge {
+    version = "${minecraft_version}-${forge_version}"
+
+    mods {
+        field_guide_export {
+            sourceSet sourceSets.main
+        }
+    }
+
+    runs {
+        configureEach {
+            gameDirectory = project.file('run')
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'INFO'
+        }
+        client {
+            client()
+        }
+        exportClient {
+            client()
+            ideName = 'Guide Export Client'
+            systemProperty 'fieldguide.exportFolder', 'build/guide-export'
+        }
+    }
+}
+
+tasks.withType(ProcessResources).configureEach {
+    def resourceProps = [
+            minecraft_version: minecraft_version,
+            mod_authors      : mod_authors,
+            mod_description  : mod_description,
+            mod_id           : mod_id,
+            mod_license      : mod_license,
+            mod_name         : mod_name,
+            mod_version      : mod_version,
+            mwe_version      : mwe_version,
+    ]
+    inputs.properties(resourceProps)
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand(resourceProps)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:deprecation'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            groupId = group_id
+            artifactId = archives_name
+            version = mod_version
+            artifact(tasks.jar)
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri(fgePackagesUrl)
+            credentials {
+                username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
+}
