@@ -30,10 +30,16 @@ versionRange = "[1,)"
 ordering = "NONE"
 side = "BOTH"
 
-# Phase 3 — uncomment when depending on minecraft-web-export at compile time:
-# [[dependencies.${mod_id}]]
-# modId = "minecraft_web_export"
-# mandatory = true
-# versionRange = "[${mwe_version},)"
-# ordering = "AFTER"
-# side = "BOTH"
+[[dependencies.${mod_id}]]
+modId = "minecraft_web_export"
+mandatory = true
+versionRange = "[${mwe_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "emi"
+mandatory = true
+versionRange = "[1,)"
+ordering = "AFTER"
+side = "CLIENT"

@@ -1,6 +1,14 @@
 # Field Guide Export
 
-Forge mod that exports the TFG Patchouli field guide to `guide-export/`. Uses [minecraft-web-export](https://github.com/jmecn/minecraft-web-export) for EMI later (`mwe_version` in `gradle.properties`).
+Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](https://github.com/jmecn/minecraft-web-export) (`mwe_version` in `gradle.properties`).
+
+## Layout
+
+```text
+<exportRoot>/
+  guide-export/   manifest.json, meta.json, assets/, data/
+  emi/          scoped EMI bundle (when exportEmi is on)
+```
 
 ## Build
 
@@ -8,13 +16,31 @@ Forge mod that exports the TFG Patchouli field guide to `guide-export/`. Uses [m
 ./gradlew jar
 ```
 
-Gradle may need `gpr.user` / `gpr.key` (or `GITHUB_TOKEN`) to reach GitHub Packages for minecraft-web-export.
+GitHub Packages: `gpr.user` / `gpr.key` or `GITHUB_TOKEN` for minecraft-web-export.
+
+## Release
+
+Push tag `v*` → workflow builds jar, publishes to GitHub Packages, attaches asset to GitHub Release.
 
 ## Runs
 
-| Task | Notes |
-|------|-------|
-| `runClient` | Dev client |
-| `runExportClient` | Sets `fieldguide.exportFolder=build/guide-export` |
+| Gradle run | Purpose |
+|------------|---------|
+| `runClient` | Dev |
+| `runExportClient` | Guide only → `build/guide-export` |
+| `runExportCiClient` | CI: `fieldguide.runExportAndExit` → `build/export/` |
 
-Implementation is being moved over from `Field-Guide-Modern/forge`.
+In-game: `/fieldguideexport run` (guide + EMI when `fieldguide.exportEmi` is not `false`).
+
+## CI JVM flags (modpack)
+
+```text
+-Dfieldguide.runExportAndExit=true
+-Dfieldguide.exportRoot=<dir>
+-DminecraftWebExport.exportWorldName=guide-export
+-DminecraftWebExport.exportMode=scoped
+```
+
+Do **not** set `-DminecraftWebExport.runExportAndExit=true` (mwe driver would conflict).
+
+Install **both** `field-guide-export` and `minecraft-web-export` jars from releases.

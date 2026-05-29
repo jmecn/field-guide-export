@@ -17,9 +17,6 @@ java {
     }
 }
 
-def mwePackagesUrl = "https://maven.pkg.github.com/${mwe_packages_owner}/${mwe_packages_repository}"
-def fgePackagesUrl = "https://maven.pkg.github.com/${github_packages_owner}/${github_packages_repository}"
-
 repositories {
     mavenCentral()
     maven {
@@ -32,8 +29,13 @@ repositories {
         content { includeGroup 'maven.modrinth' }
     }
     maven {
+        name = 'TerraformersMC'
+        url = 'https://maven.terraformersmc.com/'
+        content { includeGroup 'dev.emi' }
+    }
+    maven {
         name = 'GitHubPackagesMinecraftWebExport'
-        url = uri(mwePackagesUrl)
+        url = uri("https://maven.pkg.github.com/jmecn/minecraft-web-export")
         credentials {
             username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
             password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
@@ -45,11 +47,13 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.13.1'
 
     compileOnly("maven.modrinth:patchouli:${patchouli_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:patchouli:${patchouli_version}") { transitive = false }
     modRuntimeOnly("maven.modrinth:patchouli:${patchouli_version}") { transitive = false }
 
-    // Phase 3: scoped EMI via minecraft-web-export ExportModule
-    // modCompileOnly fg.deobf("${mwe_group_id}:${mwe_artifact_id}:${mwe_version}")
-    // modRuntimeOnly fg.deobf("${mwe_group_id}:${mwe_artifact_id}:${mwe_version}")
+    modCompileOnly "io.github.jmecn:minecraft-web-export:${mwe_version}"
+    modRuntimeOnly "io.github.jmecn:minecraft-web-export:${mwe_version}"
+    modCompileOnly "dev.emi:emi-forge:${emi_version}"
+    modRuntimeOnly "dev.emi:emi-forge:${emi_version}"
 }
 
 legacyForge {
@@ -74,6 +78,20 @@ legacyForge {
             client()
             ideName = 'Guide Export Client'
             systemProperty 'fieldguide.exportFolder', 'build/guide-export'
+            systemProperty 'fieldguide.exportEmi', 'false'
+        }
+        exportCiClient {
+            client()
+            ideName = 'Export CI Client'
+            systemProperty 'fieldguide.runExportAndExit', 'true'
+            systemProperty 'fieldguide.exportRoot', 'build/export'
+            systemProperty 'minecraftWebExport.exportWorldName', 'guide-export'
+            systemProperty 'minecraftWebExport.exportMode', 'scoped'
+            systemProperty 'minecraftWebExport.export.enabled', 'true'
+            systemProperty 'minecraftWebExport.exportWarmupTicks', '100'
+            systemProperty 'minecraftWebExport.exportWorldDelayTicks', '60'
+            systemProperty 'fieldguide.exportWarmupTicks', '2400'
+            systemProperty 'fieldguide.exportTimeoutSeconds', '7200'
         }
     }
 }
@@ -112,7 +130,7 @@ publishing {
     repositories {
         maven {
             name = 'GitHubPackages'
-            url = uri(fgePackagesUrl)
+            url = uri("https://maven.pkg.github.com/jmecn/field-guide-export")
             credentials {
                 username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
                 password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
