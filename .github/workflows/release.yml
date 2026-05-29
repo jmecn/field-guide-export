@@ -21,7 +21,10 @@ jobs:
           distribution: temurin
 
       - name: Build and publish to GitHub Packages
-        run: chmod +x gradlew && ./gradlew jar publish --no-daemon
+        run: |
+          chmod +x gradlew
+          VER="${GITHUB_REF_NAME#v}"
+          ./gradlew jar publish --no-daemon -Pmod_version="$VER"
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

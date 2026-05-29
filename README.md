@@ -20,7 +20,9 @@ GitHub Packages: `gpr.user` / `gpr.key` or `GITHUB_TOKEN` for minecraft-web-expo
 
 ## Release
 
-Push tag `v*` → workflow builds jar, publishes to GitHub Packages, attaches asset to GitHub Release.
+`mod_version` in `gradle.properties` should match the tag (e.g. `0.1.0` ↔ `v0.1.0`). CI passes `-Pmod_version` from the tag so the jar is always `field-guide-export-<version>.jar`.
+
+Push tag `v*` → workflow builds jar, publishes to GitHub Packages, attaches asset to GitHub Release. After shipping, bump `mod_version` on `main` for the next cycle (e.g. `0.2.0-SNAPSHOT`).
 
 ## Runs
 
