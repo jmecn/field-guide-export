@@ -1,11 +1,16 @@
 package io.github.jmecn.fieldguideexport.export.module;
 
+import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
+import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
 import io.github.jmecn.fieldguideexport.export.scan.BookScanResult;
 import io.github.jmecn.minecraftwebexport.export.module.ExportHints;
 import io.github.jmecn.minecraftwebexport.export.module.ExportModule;
 import io.github.jmecn.minecraftwebexport.export.module.ExportScope;
 import io.github.jmecn.minecraftwebexport.export.module.ExportSeeds;
+import net.minecraft.client.Minecraft;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +42,13 @@ public final class FieldGuideExportModule implements ExportModule {
     @Override
     public String moduleId() {
         return MODULE_ID;
+    }
+
+    @Override
+    public void beforeEmiExport(ExportScope scope, Minecraft client) throws IOException {
+        Path guideDir = FieldGuideExportPaths.guideDirectoryFromExportRoot(scope.outputRoot());
+        clearScanResult();
+        GuideExportOrchestrator.run(guideDir);
     }
 
     @Override

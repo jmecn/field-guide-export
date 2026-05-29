@@ -83,15 +83,14 @@ legacyForge {
         exportCiClient {
             client()
             ideName = 'Export CI Client'
-            systemProperty 'fieldguide.runExportAndExit', 'true'
-            systemProperty 'fieldguide.exportRoot', 'build/export'
+            systemProperty 'minecraftWebExport.runExportAndExit', 'true'
+            systemProperty 'minecraftWebExport.export.outputDir', 'build/export'
             systemProperty 'minecraftWebExport.exportWorldName', 'guide-export'
             systemProperty 'minecraftWebExport.exportMode', 'scoped'
             systemProperty 'minecraftWebExport.export.enabled', 'true'
             systemProperty 'minecraftWebExport.exportWarmupTicks', '100'
             systemProperty 'minecraftWebExport.exportWorldDelayTicks', '60'
-            systemProperty 'fieldguide.exportWarmupTicks', '2400'
-            systemProperty 'fieldguide.exportTimeoutSeconds', '7200'
+            systemProperty 'minecraftWebExport.exportTimeoutSeconds', '7200'
         }
     }
 }

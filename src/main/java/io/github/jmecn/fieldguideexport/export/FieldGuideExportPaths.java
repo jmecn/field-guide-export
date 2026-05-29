@@ -1,5 +1,7 @@
 package io.github.jmecn.fieldguideexport.export;
 
+import io.github.jmecn.minecraftwebexport.export.RuntimeExportEntrypoint;
+
 import java.nio.file.Path;
 
 /**
@@ -17,6 +19,10 @@ public final class FieldGuideExportPaths {
     private FieldGuideExportPaths() {}
 
     public static Path resolveExportRoot(Path gameDirectory) {
+        String mweOut = System.getProperty(RuntimeExportEntrypoint.OUTPUT_ROOT_PROPERTY);
+        if (mweOut != null && !mweOut.isBlank()) {
+            return Path.of(mweOut.trim());
+        }
         String root = System.getProperty(EXPORT_ROOT_PROPERTY);
         if (root != null && !root.isBlank()) {
             return Path.of(root.trim());

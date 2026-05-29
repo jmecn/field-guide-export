@@ -2,8 +2,8 @@ package io.github.jmecn.fieldguideexport.mod;
 
 import io.github.jmecn.fieldguideexport.export.CombinedExportOrchestrator;
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
+import io.github.jmecn.fieldguideexport.export.FieldGuideExportProperties;
 import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
-import io.github.jmecn.fieldguideexport.export.ci.FieldGuideExportCiProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -25,7 +25,7 @@ public final class GuideExport {
             Path gameDir = client.gameDirectory.toPath();
             Path guideDir = FieldGuideExportPaths.guideDirectory(gameDir);
             Component message;
-            if (FieldGuideExportCiProperties.exportEmi()) {
+            if (FieldGuideExportProperties.exportEmi()) {
                 Path exportRoot = FieldGuideExportPaths.resolveExportRoot(gameDir);
                 message = CombinedExportOrchestrator.run(exportRoot, gameDir, client).guideMessage();
             } else {

@@ -7,7 +7,7 @@ Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](htt
 ```text
 <exportRoot>/
   guide-export/   manifest.json, meta.json, assets/, data/
-  emi/          scoped EMI bundle (when exportEmi is on)
+  emi/            scoped EMI (minecraft-web-export)
 ```
 
 ## Build
@@ -16,13 +16,11 @@ Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](htt
 ./gradlew jar
 ```
 
-GitHub Packages: `gpr.user` / `gpr.key` or `GITHUB_TOKEN` for minecraft-web-export.
+Requires minecraft-web-export **0.3.3+** on GitHub Packages (`gpr.user` / `GITHUB_TOKEN`).
 
 ## Release
 
-`mod_version` in `gradle.properties` should match the tag (e.g. `0.1.0` ↔ `v0.1.0`). CI passes `-Pmod_version` from the tag so the jar is always `field-guide-export-<version>.jar`.
-
-Push tag `v*` → workflow builds jar, publishes to GitHub Packages, attaches asset to GitHub Release. After shipping, bump `mod_version` on `main` for the next cycle (e.g. `0.2.0-SNAPSHOT`).
+`mod_version` ↔ tag (`0.1.1` ↔ `v0.1.1`). Push `v*` → jar + GitHub Packages + Release asset.
 
 ## Runs
 
@@ -30,19 +28,19 @@ Push tag `v*` → workflow builds jar, publishes to GitHub Packages, attaches as
 |------------|---------|
 | `runClient` | Dev |
 | `runExportClient` | Guide only → `build/guide-export` |
-| `runExportCiClient` | CI: `fieldguide.runExportAndExit` → `build/export/` |
+| `runExportCiClient` | mwe CI driver → `build/export/` (guide + EMI) |
 
-In-game: `/fieldguideexport run` (guide + EMI when `fieldguide.exportEmi` is not `false`).
+In-game: `/fieldguideexport run`. Guide-only: `-Dfieldguide.exportEmi=false`.
 
-## CI JVM flags (modpack)
+## CI JVM (modpack)
+
+Install **field-guide-export** + **minecraft-web-export** jars. Headless export:
 
 ```text
--Dfieldguide.runExportAndExit=true
--Dfieldguide.exportRoot=<dir>
--DminecraftWebExport.exportWorldName=guide-export
+-DminecraftWebExport.runExportAndExit=true
+-DminecraftWebExport.export.outputDir=<exportRoot>
 -DminecraftWebExport.exportMode=scoped
+-DminecraftWebExport.exportWorldName=guide-export
 ```
 
-Do **not** set `-DminecraftWebExport.runExportAndExit=true` (mwe driver would conflict).
-
-Install **both** `field-guide-export` and `minecraft-web-export` jars from releases.
+World creation and the tick driver live in **minecraft-web-export** (`ExportCiDriver`, `ExportWorldCreator`). field-guide-export only registers `FieldGuideExportModule` (guide pass + EMI seeds).

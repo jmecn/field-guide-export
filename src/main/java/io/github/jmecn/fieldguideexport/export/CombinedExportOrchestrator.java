@@ -1,6 +1,5 @@
 package io.github.jmecn.fieldguideexport.export;
 
-import io.github.jmecn.fieldguideexport.export.module.FieldGuideExportModule;
 import io.github.jmecn.minecraftwebexport.export.RuntimeExportEntrypoint;
 import io.github.jmecn.minecraftwebexport.export.module.ExportCoordinator;
 import io.github.jmecn.minecraftwebexport.export.module.ExportResult;
@@ -14,7 +13,8 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 /**
- * Phase 3: {@code guide-export/} then scoped EMI under {@code emi/} via minecraft-web-export.
+ * In-game combined export: {@link ExportCoordinator} runs {@code guide-export/} via
+ * {@link FieldGuideExportModule#beforeEmiExport} then scoped EMI under {@code emi/}.
  */
 public final class CombinedExportOrchestrator {
 
@@ -31,18 +31,13 @@ public final class CombinedExportOrchestrator {
         Objects.requireNonNull(client, "client");
 
         ensureScopedEmiDefaults();
-
-        Path guideDir = FieldGuideExportPaths.guideDirectoryFromExportRoot(exportRoot);
-        LOGGER.info("[export] guide → {}, EMI scoped → {}/emi/",
-                guideDir.toAbsolutePath(),
-                exportRoot.toAbsolutePath());
-
-        FieldGuideExportModule.getInstance().clearScanResult();
-        Component guideMessage = GuideExportOrchestrator.run(guideDir);
+        LOGGER.info("[export] combined → {} (guide-export/ + emi/)", exportRoot.toAbsolutePath());
 
         ExportResult emiResult = new ExportCoordinator().run(exportRoot, gameDirectory, client);
+        Component guideMessage = Component.literal(
+                "[field-guide-export] guide + EMI → " + exportRoot.toAbsolutePath());
         LOGGER.info(
-                "[export] combined finished: recipes={}/{}, items={}",
+                "[export] finished: recipes={}/{}, items={}",
                 emiResult.recipesWritten(),
                 emiResult.recipesRequested(),
                 emiResult.itemIndexCount());
