@@ -2,12 +2,17 @@ package io.github.jmecn.fieldguideexport.export.module;
 
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
 import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
+import io.github.jmecn.fieldguideexport.export.resources.HandbookLangExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BookScanResult;
+import io.github.jmecn.minecraftwebexport.export.emi.ItemIconRendererExporter;
 import io.github.jmecn.minecraftwebexport.export.module.ExportHints;
 import io.github.jmecn.minecraftwebexport.export.module.ExportModule;
+import io.github.jmecn.minecraftwebexport.export.module.ExportResult;
 import io.github.jmecn.minecraftwebexport.export.module.ExportScope;
 import io.github.jmecn.minecraftwebexport.export.module.ExportSeeds;
 import net.minecraft.client.Minecraft;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,6 +23,8 @@ import java.util.Map;
  * Supplies Patchouli book scan seeds to minecraft-web-export scoped EMI export.
  */
 public final class FieldGuideExportModule implements ExportModule {
+
+    private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");
 
     public static final String MODULE_ID = "field_guide_export";
 
@@ -73,6 +80,36 @@ public final class FieldGuideExportModule implements ExportModule {
             blockIdFromRef(ref).ifPresent(builder::blockId);
         }
         return builder.build();
+    }
+
+    @Override
+    public void exportExtras(ExportScope scope, ExportResult result) throws IOException {
+        Path guideDir = FieldGuideExportPaths.guideDirectoryFromExportRoot(scope.outputRoot());
+        Minecraft client = Minecraft.getInstance();
+        if (client == null) {
+            LOGGER.warn("exportExtras skipped: Minecraft client unavailable");
+            return;
+        }
+
+        if (HandbookLangExporter.isEnabled()) {
+            HandbookLangExporter.Result lang = HandbookLangExporter.exportHandbookLang(guideDir, client);
+            LOGGER.info("[exportExtras] lang: {} files, {} bytes", lang.languagesWritten(), lang.totalBytes());
+        }
+
+        BookScanResult scan = scanResult;
+        if (scan != null && !scan.getItems().isEmpty()) {
+            Path iconsRoot = guideDir.resolve("assets/icons");
+            ItemIconRendererExporter.Result icons = ItemIconRendererExporter.exportAtRoot(
+                    iconsRoot,
+                    client,
+                    scan.getItems(),
+                    Map.copyOf(scan.getItemReferenceCounts()));
+            LOGGER.info(
+                    "[exportExtras] handbook icons: {} sprites, {} pages at {}",
+                    icons.totalSpritesWritten(),
+                    icons.atlasPages(),
+                    iconsRoot.toAbsolutePath());
+        }
     }
 
     @Override

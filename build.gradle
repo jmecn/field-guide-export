@@ -85,7 +85,7 @@ legacyForge {
             ideName = 'Export CI Client'
             systemProperty 'minecraftWebExport.runExportAndExit', 'true'
             systemProperty 'minecraftWebExport.export.outputDir', 'build/export'
-            systemProperty 'minecraftWebExport.exportWorldName', 'guide-export'
+            systemProperty 'minecraftWebExport.exportWorldName', 'emi-export'
             systemProperty 'minecraftWebExport.exportMode', 'scoped'
             systemProperty 'minecraftWebExport.export.enabled', 'true'
             systemProperty 'minecraftWebExport.exportWarmupTicks', '100'

@@ -2,12 +2,15 @@
 
 Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](https://github.com/jmecn/minecraft-web-export) (`mwe_version` in `gradle.properties`).
 
+**导出契约与开发计划**：见 Cursor Plans → **tfg > Field Guide Export 开发**。  
+FGM 建站目标为 **`:site`**（`forge` / `cli` 仅历史参考，非生产路径）。
+
 ## Layout
 
 ```text
 <exportRoot>/
-  guide-export/   manifest.json, meta.json, assets/, data/
-  emi/            scoped EMI (minecraft-web-export)
+  guide-export/   manifest.json, meta.json, assets/, data/, lang/, assets/icons/ (planned)
+  emi/            scoped EMI bundle schema 2 (minecraft-web-export)
 ```
 
 ## Build
@@ -20,7 +23,7 @@ Requires minecraft-web-export **0.3.3+** on GitHub Packages (`gpr.user` / `GITHU
 
 ## Release
 
-`mod_version` ↔ tag (`0.1.1` ↔ `v0.1.1`). Push `v*` → jar + GitHub Packages + Release asset.
+`mod_version` ↔ tag (`0.1.2` ↔ `v0.1.2`). Push `v*` → jar + GitHub Packages + Release asset.
 
 ## Runs
 
@@ -40,7 +43,6 @@ Install **field-guide-export** + **minecraft-web-export** jars. Headless export:
 -DminecraftWebExport.runExportAndExit=true
 -DminecraftWebExport.export.outputDir=<exportRoot>
 -DminecraftWebExport.exportMode=scoped
--DminecraftWebExport.exportWorldName=guide-export
 ```
 
-World creation and the tick driver live in **minecraft-web-export** (`ExportCiDriver`, `ExportWorldCreator`). field-guide-export only registers `FieldGuideExportModule` (guide pass + EMI seeds).
+World creation and the tick driver live in **minecraft-web-export** (`ExportCiDriver`, `ExportWorldCreator`). field-guide-export registers `FieldGuideExportModule` (guide pass + EMI seeds).
