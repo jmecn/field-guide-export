@@ -35,7 +35,7 @@ public final class HandbookIconExporter {
                     tempRoot,
                     client,
                     onlyItemIds,
-                    null,
+                    Set.of(),
                     usageWeights,
                     Map.of());
             Path emiIcons = tempRoot.resolve("emi").resolve("icons");
