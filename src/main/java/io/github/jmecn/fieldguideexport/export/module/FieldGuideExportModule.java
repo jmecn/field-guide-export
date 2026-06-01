@@ -2,6 +2,7 @@ package io.github.jmecn.fieldguideexport.export.module;
 
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
 import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
+import io.github.jmecn.fieldguideexport.export.resources.HandbookIconExporter;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookLangExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BookScanResult;
 import io.github.jmecn.minecraftwebexport.export.emi.ItemIconRendererExporter;
@@ -92,14 +93,14 @@ public final class FieldGuideExportModule implements ExportModule {
         }
 
         if (HandbookLangExporter.isEnabled()) {
-            HandbookLangExporter.Result lang = HandbookLangExporter.exportHandbookLang(guideDir, client);
+            HandbookLangExporter.Result lang = HandbookLangExporter.exportHandbookLang(guideDir, client, null, null);
             LOGGER.info("[exportExtras] lang: {} files, {} bytes", lang.languagesWritten(), lang.totalBytes());
         }
 
         BookScanResult scan = scanResult;
         if (scan != null && !scan.getItems().isEmpty()) {
             Path iconsRoot = guideDir.resolve("assets/icons");
-            ItemIconRendererExporter.Result icons = ItemIconRendererExporter.exportAtRoot(
+            ItemIconRendererExporter.Result icons = HandbookIconExporter.export(
                     iconsRoot,
                     client,
                     scan.getItems(),

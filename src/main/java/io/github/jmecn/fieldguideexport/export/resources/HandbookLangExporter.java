@@ -52,6 +52,11 @@ public final class HandbookLangExporter {
         return export(outputDir, client, null, null);
     }
 
+    /** Writes merged lang files under {@code guide-export/lang/} (full merge). */
+    public static Result exportHandbookLang(Path outputDir, Minecraft client) throws IOException {
+        return exportHandbookLang(outputDir, client, null, null);
+    }
+
     /** Writes merged lang files under {@code guide-export/lang/}. */
     public static Result exportHandbookLang(Path outputDir, Minecraft client, Set<String> onlyNamespaces, Set<String> onlyKeys)
             throws IOException {
