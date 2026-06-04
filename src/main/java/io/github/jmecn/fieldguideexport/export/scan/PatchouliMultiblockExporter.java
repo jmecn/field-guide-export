@@ -13,12 +13,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import vazkii.patchouli.api.IMultiblock;
 import vazkii.patchouli.common.multiblock.AbstractMultiblock;
+import vazkii.patchouli.common.multiblock.DenseMultiblock;
 import vazkii.patchouli.common.multiblock.MultiblockRegistry;
 import vazkii.patchouli.common.multiblock.SerializedMultiblock;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -26,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Resolves Patchouli {@code multiblock_id} references against the live game — something the
@@ -56,6 +60,10 @@ public final class PatchouliMultiblockExporter {
         public final Map<String, Map<String, Object>> mapping = new LinkedHashMap<>();
         /** De-duplicated blockstates used by this structure (for CLI variant lookup). */
         public final List<Map<String, Object>> blockstates = new ArrayList<>();
+        /**
+         * Patchouli dense pattern: outer list = Y layers; each layer = Z rows; each row = X chars.
+         */
+        public final List<List<String>> pattern = new ArrayList<>();
 
         ExportedMultiblock(String id) {
             this.id = id;
@@ -104,12 +112,15 @@ public final class PatchouliMultiblockExporter {
         }
 
         IMultiblock multiblock = MultiblockRegistry.MULTIBLOCKS.get(loc);
+        SerializedMultiblock serialized = null;
         if (multiblock != null) {
             result.source = "patchouli_registry";
         } else {
-            multiblock = tryLoadJsonMultiblock(loc, resourceManager, bookId);
-            if (multiblock != null) {
+            serialized = tryLoadSerializedMultiblock(loc, resourceManager, bookId);
+            if (serialized != null) {
+                multiblock = serialized.toMultiblock();
                 result.source = "patchouli_json";
+                copyPatternFromSerialized(serialized, result);
             }
         }
 
@@ -124,6 +135,9 @@ public final class PatchouliMultiblockExporter {
         }
 
         try {
+            if (result.pattern.isEmpty()) {
+                copyPatternFromDense(multiblock, result);
+            }
             fillFromSimulate(result, multiblock, level);
         } catch (RuntimeException e) {
             result.error = "simulate_failed";
@@ -169,10 +183,104 @@ public final class PatchouliMultiblockExporter {
                 result.blockstates.add(BlockStateExportMaps.toMap(resolved));
             }
         }
+
+        if (result.pattern.isEmpty()) {
+            buildPatternFromSimulate(sim, result);
+        }
+    }
+
+    private static void copyPatternFromSerialized(SerializedMultiblock serialized, ExportedMultiblock result) {
+        try {
+            Field field = SerializedMultiblock.class.getDeclaredField("densePattern");
+            field.setAccessible(true);
+            String[][] dense = (String[][]) field.get(serialized);
+            if (dense != null) {
+                copyDensePattern(dense, result);
+            }
+        } catch (ReflectiveOperationException e) {
+            LOGGER.debug("[multiblock] could not read SerializedMultiblock.pattern for {}", result.id, e);
+        }
+    }
+
+    private static void copyPatternFromDense(IMultiblock multiblock, ExportedMultiblock result) {
+        if (!(multiblock instanceof DenseMultiblock)) {
+            return;
+        }
+        try {
+            Field field = DenseMultiblock.class.getDeclaredField("pattern");
+            field.setAccessible(true);
+            String[][] dense = (String[][]) field.get(multiblock);
+            if (dense != null) {
+                copyDensePattern(dense, result);
+            }
+        } catch (ReflectiveOperationException e) {
+            LOGGER.debug("[multiblock] could not read DenseMultiblock.pattern for {}", result.id, e);
+        }
+    }
+
+    private static void copyDensePattern(String[][] dense, ExportedMultiblock result) {
+        result.pattern.clear();
+        for (String[] layer : dense) {
+            result.pattern.add(Arrays.asList(layer));
+        }
+    }
+
+    /**
+     * Reconstruct a dense Patchouli pattern from simulate() layout (for registry sparse structures).
+     */
+    private static void buildPatternFromSimulate(
+            Pair<BlockPos, Collection<IMultiblock.SimulateResult>> sim,
+            ExportedMultiblock result) {
+        BlockPos origin = sim.getFirst();
+        TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, Character>>> grid = new TreeMap<>();
+        for (IMultiblock.SimulateResult cell : sim.getSecond()) {
+            Character ch = cell.getCharacter();
+            if (ch == null) {
+                continue;
+            }
+            BlockPos rel = cell.getWorldPosition().subtract(origin);
+            grid.computeIfAbsent(rel.getY(), y -> new TreeMap<>())
+                    .computeIfAbsent(rel.getZ(), z -> new TreeMap<>())
+                    .put(rel.getX(), ch);
+        }
+        if (grid.isEmpty()) {
+            return;
+        }
+        int minY = grid.firstKey();
+        int maxY = grid.lastKey();
+        int minZ = grid.values().stream().mapToInt(TreeMap::firstKey).min().orElse(0);
+        int maxZ = grid.values().stream().mapToInt(TreeMap::lastKey).max().orElse(0);
+        int minX = grid.values().stream()
+                .flatMap(zMap -> zMap.values().stream())
+                .mapToInt(TreeMap::firstKey)
+                .min()
+                .orElse(0);
+        int maxX = grid.values().stream()
+                .flatMap(zMap -> zMap.values().stream())
+                .mapToInt(TreeMap::lastKey)
+                .max()
+                .orElse(0);
+
+        result.pattern.clear();
+        for (int y = minY; y <= maxY; y++) {
+            List<String> layer = new ArrayList<>();
+            TreeMap<Integer, TreeMap<Integer, Character>> zMap =
+                    grid.getOrDefault(y, new TreeMap<>());
+            for (int z = minZ; z <= maxZ; z++) {
+                StringBuilder row = new StringBuilder();
+                TreeMap<Integer, Character> xMap = zMap.getOrDefault(z, new TreeMap<>());
+                for (int x = minX; x <= maxX; x++) {
+                    Character c = xMap.get(x);
+                    row.append(c != null ? c : ' ');
+                }
+                layer.add(row.toString());
+            }
+            result.pattern.add(layer);
+        }
     }
 
     @SuppressWarnings("removal")
-    private static IMultiblock tryLoadJsonMultiblock(
+    private static SerializedMultiblock tryLoadSerializedMultiblock(
             ResourceLocation id,
             ResourceManager resourceManager,
             String bookId) {
@@ -190,10 +298,7 @@ public final class PatchouliMultiblockExporter {
                 continue;
             }
             try (BufferedReader reader = resource.get().openAsReader()) {
-                SerializedMultiblock data = GSON.fromJson(reader, SerializedMultiblock.class);
-                if (data != null) {
-                    return data.toMultiblock();
-                }
+                return GSON.fromJson(reader, SerializedMultiblock.class);
             } catch (IOException | RuntimeException e) {
                 LOGGER.debug("[multiblock] failed to read {}", key, e);
             }

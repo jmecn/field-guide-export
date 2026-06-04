@@ -464,6 +464,9 @@ public final class GuideExportOrchestrator {
                 if (mb.error != null) {
                     m.put("error", mb.error);
                 }
+                if (!mb.pattern.isEmpty()) {
+                    m.put("pattern", mb.pattern);
+                }
                 if (!mb.mapping.isEmpty()) {
                     m.put("mapping", mb.mapping);
                 }
