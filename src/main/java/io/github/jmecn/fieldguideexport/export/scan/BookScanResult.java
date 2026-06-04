@@ -34,6 +34,12 @@ public final class BookScanResult {
     private final Set<String> recipes = new TreeSet<>();
 
     /**
+     * Handbook recipe id → EMI recipe id used for scoped export and site {@code data-recipe-id}.
+     * Populated by {@link io.github.jmecn.fieldguideexport.export.emi.HandbookRecipeMountResolver}.
+     */
+    private final Map<String, String> recipeMountIds = new TreeMap<>();
+
+    /**
      * Recipe ids grouped by the page type that referenced them. Lets the consumer answer
      * "which recipe ids does a {@code patchouli:crafting} page actually point at"
      * without scanning twice.
@@ -100,6 +106,29 @@ public final class BookScanResult {
 
     public Set<String> getRecipes() {
         return recipes;
+    }
+
+    /** Handbook recipe id → EMI mount/export recipe id (immutable copy). */
+    public Map<String, String> getRecipeMountIds() {
+        return Map.copyOf(recipeMountIds);
+    }
+
+    /**
+     * EMI recipe id to export or mount; defaults to {@code handbookRecipeId} when unset.
+     */
+    public String getRecipeMountId(String handbookRecipeId) {
+        if (handbookRecipeId == null || handbookRecipeId.isBlank()) {
+            return handbookRecipeId;
+        }
+        return recipeMountIds.getOrDefault(handbookRecipeId, handbookRecipeId);
+    }
+
+    public void putRecipeMountId(String handbookRecipeId, String mountRecipeId) {
+        if (handbookRecipeId == null || handbookRecipeId.isBlank()) {
+            return;
+        }
+        String mount = mountRecipeId == null || mountRecipeId.isBlank() ? handbookRecipeId : mountRecipeId;
+        recipeMountIds.put(handbookRecipeId, mount);
     }
 
     public Map<String, Set<String>> getRecipesByPageType() {

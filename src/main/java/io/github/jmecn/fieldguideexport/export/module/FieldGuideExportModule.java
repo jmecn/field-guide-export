@@ -3,6 +3,7 @@ package io.github.jmecn.fieldguideexport.export.module;
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportLanguages;
 import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
+import io.github.jmecn.fieldguideexport.export.emi.HandbookRecipeMountResolver;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookIconExporter;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookLangExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BookScanResult;
@@ -58,6 +59,7 @@ public final class FieldGuideExportModule implements ExportModule {
         Path guideDir = FieldGuideExportPaths.guideDirectoryFromExportRoot(scope.outputRoot());
         clearScanResult();
         GuideExportOrchestrator.run(guideDir);
+        HandbookRecipeMountResolver.resolve(scanResult, client);
     }
 
     @Override
@@ -67,7 +69,9 @@ public final class FieldGuideExportModule implements ExportModule {
             return ExportSeeds.empty();
         }
         ExportSeeds.Builder builder = ExportSeeds.builder();
-        scan.getRecipes().forEach(builder::recipeId);
+        for (String handbookRecipeId : scan.getRecipes()) {
+            builder.recipeId(scan.getRecipeMountId(handbookRecipeId));
+        }
         scan.getItems().forEach(builder::itemId);
         scan.getTags().forEach(builder::tagId);
         scan.getEntities().forEach(builder::entityId);

@@ -398,6 +398,7 @@ public final class GuideExportOrchestrator {
 
         Map<String, Object> refs = new LinkedHashMap<>();
         refs.put("recipes", scan.getRecipes());
+        refs.put("recipeMountIds", scan.getRecipeMountIds());
         refs.put("recipesByPageType", scan.getRecipesByPageType());
         refs.put("items", scan.getItems());
         refs.put("tags", scan.getTags());
