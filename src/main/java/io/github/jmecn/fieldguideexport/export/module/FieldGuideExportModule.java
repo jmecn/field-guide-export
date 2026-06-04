@@ -1,6 +1,7 @@
 package io.github.jmecn.fieldguideexport.export.module;
 
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
+import io.github.jmecn.fieldguideexport.export.FieldGuideExportLanguages;
 import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookIconExporter;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookLangExporter;
@@ -115,15 +116,22 @@ public final class FieldGuideExportModule implements ExportModule {
 
     @Override
     public ExportHints buildHints(ExportScope scope, ExportSeeds mergedSeeds) {
+        List<String> exportLanguages = FieldGuideExportLanguages.asList();
         BookScanResult scan = scanResult;
         if (scan == null) {
-            return ExportHints.defaults();
+            return new ExportHints(
+                    Map.of(),
+                    Map.of(),
+                    List.of("tfc", "firmalife", "minecraft"),
+                    false,
+                    exportLanguages);
         }
         return new ExportHints(
                 Map.copyOf(scan.getItemReferenceCounts()),
                 Map.of(),
                 List.of("tfc", "firmalife", "minecraft"),
-                false);
+                false,
+                exportLanguages);
     }
 
     private static java.util.Optional<String> blockIdFromRef(String ref) {
