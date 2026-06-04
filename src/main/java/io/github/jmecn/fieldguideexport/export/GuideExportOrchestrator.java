@@ -42,6 +42,42 @@ public final class GuideExportOrchestrator {
 
     private GuideExportOrchestrator() {}
 
+    /**
+     * Updates {@code refs.recipeMountIds} after {@link io.github.jmecn.fieldguideexport.export.emi.HandbookRecipeMountResolver}
+     * runs (meta is written earlier in {@link #run} before EMI is available).
+     */
+    public static void patchRecipeMountIds(Path guideDir, BookScanResult scan) {
+        if (guideDir == null || scan == null) {
+            return;
+        }
+        Path metaFile = guideDir.resolve("meta.json");
+        if (!Files.isRegularFile(metaFile)) {
+            LOGGER.warn("[recipe-mount] meta.json missing — cannot patch recipeMountIds");
+            return;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> meta = GSON.fromJson(Files.readString(metaFile), Map.class);
+            if (meta == null) {
+                return;
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> refs = (Map<String, Object>) meta.computeIfAbsent("refs", k -> new LinkedHashMap<>());
+            Map<String, String> mounts = scan.getRecipeMountIds();
+            refs.put("recipeMountIds", mounts);
+            Files.writeString(metaFile, GSON.toJson(meta));
+            long remapped = mounts.entrySet().stream()
+                    .filter(e -> !e.getKey().equals(e.getValue()))
+                    .count();
+            LOGGER.info(
+                    "[recipe-mount] patched meta.json: {} mount ids ({} handbook→EMI)",
+                    mounts.size(),
+                    remapped);
+        } catch (IOException e) {
+            LOGGER.error("[recipe-mount] failed to patch {}", metaFile.toAbsolutePath(), e);
+        }
+    }
+
     public static Component run(Path outputDir) throws IOException {
         Files.createDirectories(outputDir);
 

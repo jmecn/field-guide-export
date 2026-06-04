@@ -60,6 +60,7 @@ public final class FieldGuideExportModule implements ExportModule {
         clearScanResult();
         GuideExportOrchestrator.run(guideDir);
         HandbookRecipeMountResolver.resolve(scanResult, client);
+        GuideExportOrchestrator.patchRecipeMountIds(guideDir, scanResult);
     }
 
     @Override
