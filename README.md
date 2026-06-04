@@ -2,9 +2,6 @@
 
 Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](https://github.com/jmecn/minecraft-web-export) (`mwe_version` in `gradle.properties`).
 
-**导出契约与开发计划**：见 Cursor Plans → **tfg > Field Guide Export 开发**。  
-FGM 建站目标为 **`:site`**（`forge` / `cli` 仅历史参考，非生产路径）。
-
 ## Layout
 
 ```text
