@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * Reads export locale codes from {@code -Dfieldguide.exportLanguages=...}.
  * The list is owned by <strong>Field-Guide-Modern</strong> ({@code Language} enum); CI sets this property
- * via {@code ./gradlew :core:printExportLanguages} — this mod does not define supported languages.
+ * via {@code ./gradlew printExportLanguages} — this mod does not define supported languages.
  */
 public final class FieldGuideExportLanguages {
 

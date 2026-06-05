@@ -10,15 +10,13 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Walks blockstate / model JSON and enqueues dependent models, parents, and textures for closure export.
- *
- * <p>Referenced blockstates are exported in full (all variant entries). Missing builtin parents such as
- * {@code forge:item/default} are materialized via {@link SyntheticModelCatalog}.</p>
+ * Walks blockstate / model JSON and enqueues dependent models, parents, and textures
  */
 @SuppressWarnings("removal")
 final class ModelDependencyWalker {
@@ -195,11 +193,8 @@ final class ModelDependencyWalker {
         if (textureNode == null || !textureNode.isJsonPrimitive()) {
             return;
         }
-        String ref = textureNode.getAsString();
-        if (ref.startsWith("#")) {
-            if (textureMap != null && textureMap.has(ref.substring(1))) {
-                enqueueTextureRef(textureMap.get(ref.substring(1)), textureMap, pending, written, rm);
-            }
+        String ref = resolveTextureRef(textureNode.getAsString(), textureMap);
+        if (ref == null) {
             return;
         }
         Set<ResourceLocation> tmp = new LinkedHashSet<>();
@@ -209,6 +204,28 @@ final class ModelDependencyWalker {
                 pending.addLast(tex);
             }
         }
+    }
+
+    private static String resolveTextureRef(String ref, JsonObject textureMap) {
+        if (ref == null || ref.isBlank()) {
+            return null;
+        }
+        Set<String> visited = new HashSet<>();
+        while (ref.startsWith("#")) {
+            String key = ref.substring(1);
+            if (!visited.add(key)) {
+                return null;
+            }
+            if (textureMap == null || !textureMap.has(key)) {
+                return null;
+            }
+            JsonElement next = textureMap.get(key);
+            if (!next.isJsonPrimitive()) {
+                return null;
+            }
+            ref = next.getAsString();
+        }
+        return ref;
     }
 
     static ResourceLocation resolveModelFile(String modelRef, String defaultNamespace) {
