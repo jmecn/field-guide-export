@@ -6,7 +6,9 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import java.util.Set;
 
 /**
- * Resolves item/block/model JSON and texture references into {@link ResourceLocation}s to export.
+ * Seeds closure export from handbook refs. Block ids enqueue the full {@code blockstates/*.json}
+ * (all variants) plus the fallback {@code models/block/*.json}; {@link ModelDependencyWalker}
+ * pulls every variant model, parent chain, and textures while writing.
  */
 @SuppressWarnings("removal")
 final class ModelDependencyCollector {
@@ -100,7 +102,7 @@ final class ModelDependencyCollector {
     }
 
     private static void enqueueModel(ResourceManager rm, ResourceLocation modelId, Set<ResourceLocation> pending) {
-        if (rm.getResource(modelId).isPresent()) {
+        if (SyntheticModelCatalog.isAvailable(rm, modelId)) {
             pending.add(modelId);
         }
     }

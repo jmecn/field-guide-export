@@ -23,8 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Writes only runtime resources reachable from a {@link BookScanResult} (Patchouli book closure),
- * instead of mirroring entire {@link ResourceExportRoots} trees.
+ * Writes only runtime resources reachable from a {@link BookScanResult} (Patchouli book closure).
  */
 @SuppressWarnings("removal")
 public final class ClosureResourceExporter {
@@ -179,16 +178,25 @@ public final class ClosureResourceExporter {
             if (excludedNamespaces.contains(id.getNamespace())) {
                 continue;
             }
-            var opt = rm.getResource(id);
-            if (opt.isEmpty()) {
-                continue;
-            }
             try {
-                counters.bytes += ResourceFileWriter.write(typeRoot, id, opt.get());
-                counters.files++;
-                counters.written++;
-                if (id.getPath().endsWith(".json") && id.getPath().startsWith("models/")) {
-                    enqueueModelDependencies(rm, id, opt.get(), pending, written);
+                var opt = rm.getResource(id);
+                if (opt.isPresent()) {
+                    counters.bytes += ResourceFileWriter.write(typeRoot, id, opt.get());
+                    counters.files++;
+                    counters.written++;
+                    enqueueParsedDependencies(rm, id, opt.get(), pending, written);
+                } else if (id.getPath().endsWith(".json") && id.getPath().startsWith("models/")) {
+                    var synthetic = SyntheticModelCatalog.content(id);
+                    if (synthetic.isPresent()) {
+                        counters.bytes += ResourceFileWriter.writeUtf8(typeRoot, id, synthetic.get());
+                        counters.files++;
+                        counters.written++;
+                        if (SyntheticModelCatalog.isSyntheticOnly(rm, id)) {
+                            LOGGER.debug("[closure] synthesized model {}", id);
+                        }
+                        var root = com.google.gson.JsonParser.parseString(synthetic.get()).getAsJsonObject();
+                        ModelDependencyWalker.enqueueModelDependenciesFromJson(rm, id, root, pending, written);
+                    }
                 }
             } catch (IOException e) {
                 counters.failures++;
@@ -198,54 +206,17 @@ public final class ClosureResourceExporter {
         return counters;
     }
 
-    private static void enqueueModelDependencies(
+    private static void enqueueParsedDependencies(
             ResourceManager rm,
-            ResourceLocation modelId,
+            ResourceLocation id,
             Resource resource,
             Deque<ResourceLocation> pending,
             Set<ResourceLocation> written) {
-        try (var reader = new java.io.InputStreamReader(resource.open(), java.nio.charset.StandardCharsets.UTF_8)) {
-            var root = com.google.gson.JsonParser.parseReader(reader).getAsJsonObject();
-            String parent = root.has("parent") && root.get("parent").isJsonPrimitive()
-                    ? root.get("parent").getAsString()
-                    : null;
-            if (parent != null && !parent.startsWith("#")) {
-                ResourceLocation parentLoc = resolveModelFile(parent);
-                if (parentLoc != null && !written.contains(parentLoc) && rm.getResource(parentLoc).isPresent()) {
-                    pending.addLast(parentLoc);
-                }
-            }
-            if (root.has("textures") && root.get("textures").isJsonObject()) {
-                for (var entry : root.get("textures").getAsJsonObject().entrySet()) {
-                    if (entry.getValue().isJsonPrimitive()) {
-                        Set<ResourceLocation> tmp = new LinkedHashSet<>();
-                        ModelDependencyCollector.seedTextureRef(entry.getValue().getAsString(), tmp);
-                        for (ResourceLocation tex : tmp) {
-                            if (!written.contains(tex) && rm.getResource(tex).isPresent()) {
-                                pending.addLast(tex);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.debug("[closure] model deps {}: {}", modelId, e.getMessage());
+        if (id.getPath().endsWith(".json") && id.getPath().startsWith("blockstates/")) {
+            ModelDependencyWalker.enqueueBlockstateDependencies(rm, id, resource, pending, written);
+        } else if (id.getPath().endsWith(".json") && id.getPath().startsWith("models/")) {
+            ModelDependencyWalker.enqueueModelDependencies(rm, id, resource, pending, written);
         }
-    }
-
-    private static ResourceLocation resolveModelFile(String parent) {
-        ResourceLocation loc = ResourceLocation.tryParse(parent);
-        if (loc == null) {
-            return null;
-        }
-        String path = loc.getPath();
-        if (!path.startsWith("models/")) {
-            path = "models/" + path;
-        }
-        if (!path.endsWith(".json")) {
-            path = path + ".json";
-        }
-        return new ResourceLocation(loc.getNamespace(), path);
     }
 
     private static final class ExportCounters {

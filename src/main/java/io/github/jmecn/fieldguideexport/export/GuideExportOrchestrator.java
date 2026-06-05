@@ -8,7 +8,6 @@ import io.github.jmecn.fieldguideexport.export.patchouli.BookEntry;
 import io.github.jmecn.fieldguideexport.export.patchouli.PatchouliBookLoader;
 import io.github.jmecn.fieldguideexport.export.resources.ClosureResourceExporter;
 import io.github.jmecn.fieldguideexport.export.resources.ExportDirectoryStats;
-import io.github.jmecn.fieldguideexport.export.resources.RuntimeResourceExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BlockStateExportMaps;
 import io.github.jmecn.fieldguideexport.export.scan.BlockStateResolver;
 import io.github.jmecn.fieldguideexport.export.module.FieldGuideExportModule;
@@ -32,8 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Phase 1 guide-export pipeline: Patchouli book scan, {@code manifest.json} / {@code meta.json},
- * and full or closure {@code assets/} + {@code data/}.
+ * Guide-export pipeline: Patchouli book scan, {@code manifest.json} / {@code meta.json},
+ * and book-referenced {@code assets/} + {@code data/} closure.
  */
 public final class GuideExportOrchestrator {
 
@@ -81,11 +80,9 @@ public final class GuideExportOrchestrator {
     public static Component run(Path outputDir) throws IOException {
         Files.createDirectories(outputDir);
 
-        FieldGuideExportMode exportMode = FieldGuideExportMode.current();
         Map<String, Object> manifest = new LinkedHashMap<>();
         manifest.put("status", "export");
         manifest.put("exportedAt", Instant.now().toString());
-        manifest.put("exportMode", exportMode.name().toLowerCase());
         manifest.put("exporter", "field-guide-export");
 
         Minecraft client = Minecraft.getInstance();
@@ -124,27 +121,12 @@ public final class GuideExportOrchestrator {
             manifest.put("error", t.getClass().getSimpleName() + ": " + t.getMessage());
         }
 
-        RuntimeResourceExporter.Result fullResources = null;
-        ClosureResourceExporter.Result closureResources = null;
-
-        if (exportMode.isClosure()) {
-            LOGGER.info("[export] mode=closure (book-referenced assets/data)");
-        } else {
-            LOGGER.info("[export] mode=full (merged assets/ + data/ trees)");
-        }
+        ClosureResourceExporter.Result resources = null;
+        LOGGER.info("[export] writing book-referenced assets/data closure");
 
         try {
-            if (!exportMode.isClosure()) {
-                fullResources = RuntimeResourceExporter.export(outputDir, client);
-            }
-        } catch (Throwable t) {
-            LOGGER.error("asset/data export failed", t);
-            manifest.put("resourceExportError", t.getClass().getSimpleName() + ": " + t.getMessage());
-        }
-
-        try {
-            if (exportMode.isClosure() && scanResult != null && book != null) {
-                closureResources = ClosureResourceExporter.export(
+            if (scanResult != null && book != null) {
+                resources = ClosureResourceExporter.export(
                         outputDir,
                         client,
                         book,
@@ -152,29 +134,25 @@ public final class GuideExportOrchestrator {
                         blockstates != null ? blockstates.entries : List.of(),
                         multiblockDefs,
                         Set.of());
+            } else {
+                LOGGER.warn("[export] skipping resource export — book scan unavailable");
             }
         } catch (Throwable t) {
-            LOGGER.error("closure resource export failed", t);
+            LOGGER.error("resource closure export failed", t);
             manifest.put("resourceExportError", t.getClass().getSimpleName() + ": " + t.getMessage());
         }
 
-        if (fullResources != null) {
-            manifest.put("resources", resourceStats(fullResources.assetFiles(), fullResources.dataFiles(),
-                    fullResources.assetBytes(), fullResources.dataBytes(),
-                    fullResources.assetFailures(), fullResources.dataFailures(),
-                    fullResources.serverSkipped()));
-        }
-        if (closureResources != null) {
+        if (resources != null) {
             Map<String, Object> resourceStats = resourceStats(
-                    closureResources.assetFiles(),
-                    closureResources.dataFiles(),
-                    closureResources.assetBytes(),
-                    closureResources.dataBytes(),
-                    closureResources.failures(),
+                    resources.assetFiles(),
+                    resources.dataFiles(),
+                    resources.assetBytes(),
+                    resources.dataBytes(),
+                    resources.failures(),
                     0,
-                    closureResources.serverSkipped());
-            resourceStats.put("closureSeeded", closureResources.seededLocations());
-            resourceStats.put("closureWritten", closureResources.writtenLocations());
+                    resources.serverSkipped());
+            resourceStats.put("closureSeeded", resources.seededLocations());
+            resourceStats.put("closureWritten", resources.writtenLocations());
             manifest.put("resources", resourceStats);
         }
 
@@ -189,7 +167,7 @@ public final class GuideExportOrchestrator {
 
         Component result = writeManifest(outputDir, manifest);
         if (scanResult != null) {
-            writeMeta(outputDir, scanResult, blockstates, multiblockDefs, fullResources, closureResources);
+            writeMeta(outputDir, scanResult, blockstates, multiblockDefs, resources);
         }
         return result;
     }
@@ -402,8 +380,7 @@ public final class GuideExportOrchestrator {
             BookScanResult scan,
             BlockStateResolution blockstates,
             List<PatchouliMultiblockExporter.ExportedMultiblock> multiblockDefs,
-            RuntimeResourceExporter.Result fullResources,
-            ClosureResourceExporter.Result closureResources) {
+            ClosureResourceExporter.Result resources) {
         Map<String, Object> meta = new LinkedHashMap<>();
         meta.put("schemaVersion", "1.3");
         meta.put("scannedAt", Instant.now().toString());
@@ -411,23 +388,14 @@ public final class GuideExportOrchestrator {
         Map<String, Object> stats = new LinkedHashMap<>(scan.toStatsMap());
         applyBlockstateStats(stats, blockstates);
         applyMultiblockStats(stats, multiblockDefs);
-        if (fullResources != null) {
-            stats.put("assetFiles", fullResources.assetFiles());
-            stats.put("dataFiles", fullResources.dataFiles());
-            stats.put("assetBytes", fullResources.assetBytes());
-            stats.put("dataBytes", fullResources.dataBytes());
-            stats.put("assetExportFailures", fullResources.assetFailures());
-            stats.put("dataExportFailures", fullResources.dataFailures());
-            stats.put("dataExportSkipped", fullResources.serverSkipped());
-        }
-        if (closureResources != null) {
-            stats.put("assetFiles", closureResources.assetFiles());
-            stats.put("dataFiles", closureResources.dataFiles());
-            stats.put("assetBytes", closureResources.assetBytes());
-            stats.put("dataBytes", closureResources.dataBytes());
-            stats.put("closureSeeded", closureResources.seededLocations());
-            stats.put("closureWritten", closureResources.writtenLocations());
-            stats.put("dataExportSkipped", closureResources.serverSkipped());
+        if (resources != null) {
+            stats.put("assetFiles", resources.assetFiles());
+            stats.put("dataFiles", resources.dataFiles());
+            stats.put("assetBytes", resources.assetBytes());
+            stats.put("dataBytes", resources.dataBytes());
+            stats.put("closureSeeded", resources.seededLocations());
+            stats.put("closureWritten", resources.writtenLocations());
+            stats.put("dataExportSkipped", resources.serverSkipped());
         }
         meta.put("stats", stats);
         meta.put("pageTypeSupport", buildPageTypeSupport(scan));

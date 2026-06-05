@@ -15,9 +15,8 @@ import java.util.TreeSet;
  * <p>This is not the schema for "what each page renders" — it's an inventory of {@code
  * domain:id} strings the book *references*, plus per–page-type and per-recipe-type counts.
  * Useful both as a sanity check (e.g. spot pages whose recipe id silently went missing
- * after a modpack update) and as the seed set for any future closure walker that mirrors
- * {@link io.github.jmecn.fieldguideexport.export.resources.RuntimeResourceExporter} writes the full
- * merged {@code assets/} + {@code data/} tree.</p>
+ * after a modpack update) and as the seed set for {@link io.github.jmecn.fieldguideexport.export.resources.ClosureResourceExporter}
+ * when writing book-referenced {@code assets/} + {@code data/}.</p>
  */
 public final class BookScanResult {
 

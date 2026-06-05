@@ -5,6 +5,7 @@ import net.minecraft.server.packs.resources.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -21,5 +22,13 @@ final class ResourceFileWriter {
             long bytes = Files.copy(in, outFile, StandardCopyOption.REPLACE_EXISTING);
             return bytes > 0 ? bytes : Files.size(outFile);
         }
+    }
+
+    static long writeUtf8(Path typeRoot, ResourceLocation id, String content) throws IOException {
+        Path outFile = typeRoot.resolve(id.getNamespace()).resolve(id.getPath());
+        Files.createDirectories(outFile.getParent());
+        byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        Files.write(outFile, bytes);
+        return bytes.length;
     }
 }
