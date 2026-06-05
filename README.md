@@ -18,10 +18,6 @@ Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](htt
 
 Requires minecraft-web-export **0.3.3+** on GitHub Packages (`gpr.user` / `GITHUB_TOKEN`).
 
-## Release
-
-`mod_version` ↔ tag (`0.1.2` ↔ `v0.1.2`). Push `v*` → jar + GitHub Packages + Release asset.
-
 ## Runs
 
 | Gradle run | Purpose |
@@ -41,5 +37,3 @@ Install **field-guide-export** + **minecraft-web-export** jars. Headless export:
 -DminecraftWebExport.export.outputDir=<exportRoot>
 -DminecraftWebExport.exportMode=scoped
 ```
-
-World creation and the tick driver live in **minecraft-web-export** (`ExportCiDriver`, `ExportWorldCreator`). field-guide-export registers `FieldGuideExportModule` (guide pass + EMI seeds).
