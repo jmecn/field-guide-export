@@ -106,12 +106,7 @@ public final class BookScanner {
             if (tag != null) {
                 result.addTag(tag);
             }
-            String single = optString(raw, "item");
-            if (single != null) {
-                addItemStackRef(result, single);
-            } else {
-                addStringArray(raw, "item", v -> addItemStackRef(result, v));
-            }
+            scanSpotlightItem(result, raw.get("item"));
         }
 
         if ("patchouli:entity".equals(type)) {
@@ -144,6 +139,37 @@ public final class BookScanner {
             collectMappingFromObject(result, inlineMb.getAsJsonObject());
         }
         collectMultiblocksArray(result, raw);
+    }
+
+    /**
+     * Patchouli spotlight {@code item} may be a string, {@code { "tag": "..." }},
+     * {@code { "item": "..." }}, or an array mixing those forms.
+     */
+    private static void scanSpotlightItem(BookScanResult result, JsonElement itemEl) {
+        if (itemEl == null || itemEl.isJsonNull()) {
+            return;
+        }
+        if (itemEl.isJsonPrimitive()) {
+            addItemStackRef(result, itemEl.getAsString());
+            return;
+        }
+        if (itemEl.isJsonObject()) {
+            JsonObject obj = itemEl.getAsJsonObject();
+            JsonElement tag = obj.get("tag");
+            if (tag != null && tag.isJsonPrimitive()) {
+                result.addTag(tag.getAsString());
+            }
+            JsonElement item = obj.get("item");
+            if (item != null && item.isJsonPrimitive()) {
+                addItemStackRef(result, item.getAsString());
+            }
+            return;
+        }
+        if (itemEl.isJsonArray()) {
+            for (JsonElement entry : itemEl.getAsJsonArray()) {
+                scanSpotlightItem(result, entry);
+            }
+        }
     }
 
     /**
