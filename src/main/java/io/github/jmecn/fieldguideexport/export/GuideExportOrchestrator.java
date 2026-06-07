@@ -8,6 +8,7 @@ import io.github.jmecn.fieldguideexport.export.patchouli.BookEntry;
 import io.github.jmecn.fieldguideexport.export.patchouli.PatchouliBookLoader;
 import io.github.jmecn.fieldguideexport.export.resources.ClosureResourceExporter;
 import io.github.jmecn.fieldguideexport.export.resources.ExportDirectoryStats;
+import io.github.jmecn.fieldguideexport.export.resources.HandbookTagMembersExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BlockStateExportMaps;
 import io.github.jmecn.fieldguideexport.export.scan.BlockStateResolver;
 import io.github.jmecn.fieldguideexport.export.module.FieldGuideExportModule;
@@ -17,6 +18,7 @@ import io.github.jmecn.fieldguideexport.export.scan.PatchouliMultiblockExporter;
 import io.github.jmecn.fieldguideexport.support.FieldGuidePageSupport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -165,11 +167,47 @@ public final class GuideExportOrchestrator {
             LOGGER.warn("[export] could not summarize export directory size", e);
         }
 
-        Component result = writeManifest(outputDir, manifest);
         if (scanResult != null) {
             writeMeta(outputDir, scanResult, blockstates, multiblockDefs, resources);
+            exportTagMembers(outputDir, client, scanResult, blockstates, manifest);
         }
+
+        Component result = writeManifest(outputDir, manifest);
         return result;
+    }
+
+    private static void exportTagMembers(
+            Path outputDir,
+            Minecraft client,
+            BookScanResult scanResult,
+            BlockStateResolution blockstates,
+            Map<String, Object> manifest) {
+        if (!HandbookTagMembersExporter.isEnabled()) {
+            return;
+        }
+        MinecraftServer server = client.getSingleplayerServer();
+        if (server == null) {
+            LOGGER.warn("[tag-members] skipped: integrated server unavailable");
+            return;
+        }
+        try {
+            HandbookTagMembersExporter.Result tags = HandbookTagMembersExporter.export(
+                    outputDir,
+                    server,
+                    scanResult,
+                    blockstates != null ? blockstates.entries : List.of());
+            @SuppressWarnings("unchecked")
+            Map<String, Object> stats = (Map<String, Object>) manifest.computeIfAbsent("stats", k -> new LinkedHashMap<>());
+            stats.put("tagMembersTags", tags.tagsRequested());
+            stats.put("tagMembersBlockTags", tags.blockTagEntries());
+            stats.put("tagMembersItemTags", tags.itemTagEntries());
+            stats.put("tagMembersFluidTags", tags.fluidTagEntries());
+            stats.put("tagMembersRefs", tags.totalMemberRefs());
+            stats.put("tagMembersBytes", tags.bytes());
+        } catch (IOException e) {
+            LOGGER.error("[tag-members] export failed", e);
+            manifest.put("tagMembersError", e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     private static Map<String, Object> resourceStats(
