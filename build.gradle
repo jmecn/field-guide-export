@@ -54,6 +54,13 @@ dependencies {
     modRuntimeOnly "io.github.jmecn:minecraft-web-export:${mwe_version}"
     modCompileOnly "dev.emi:emi-forge:${emi_version}"
     modRuntimeOnly "dev.emi:emi-forge:${emi_version}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 legacyForge {

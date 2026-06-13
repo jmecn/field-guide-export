@@ -4,7 +4,8 @@ import io.github.jmecn.fieldguideexport.export.FieldGuideExportPaths;
 import io.github.jmecn.fieldguideexport.export.FieldGuideExportLanguages;
 import io.github.jmecn.fieldguideexport.export.GuideExportOrchestrator;
 import io.github.jmecn.fieldguideexport.export.emi.HandbookRecipeMountResolver;
-import io.github.jmecn.fieldguideexport.export.resources.HandbookIconExporter;
+import io.github.jmecn.fieldguideexport.export.resources.EntityPreviewExporter;
+import io.github.jmecn.fieldguideexport.export.resources.FieldGuideIconExporter;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookLangExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BookScanResult;
 import io.github.jmecn.minecraftwebexport.export.emi.ItemIconRendererExporter;
@@ -106,7 +107,7 @@ public final class FieldGuideExportModule implements ExportModule {
         BookScanResult scan = scanResult;
         if (scan != null && !scan.getItems().isEmpty()) {
             Path iconsRoot = guideDir.resolve("assets/icons");
-            ItemIconRendererExporter.Result icons = HandbookIconExporter.export(
+            ItemIconRendererExporter.Result icons = FieldGuideIconExporter.export(
                     iconsRoot,
                     client,
                     scan.getItems(),
@@ -116,6 +117,17 @@ public final class FieldGuideExportModule implements ExportModule {
                     icons.totalSpritesWritten(),
                     icons.atlasPages(),
                     iconsRoot.toAbsolutePath());
+        }
+
+        if (scan != null && EntityPreviewExporter.isEnabled() && !scan.getEntityRenderRequests().isEmpty()) {
+            EntityPreviewExporter.Result entities = EntityPreviewExporter.export(
+                    guideDir, client, scan.getEntityRenderRequests());
+            GuideExportOrchestrator.patchEntityRenders(guideDir, entities);
+            LOGGER.info(
+                    "[exportExtras] entity previews: {}/{} ok, {} bytes",
+                    entities.succeeded(),
+                    entities.requested(),
+                    entities.bytes());
         }
     }
 

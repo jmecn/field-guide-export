@@ -6,7 +6,7 @@ Forge mod: Patchouli `guide-export/` + scoped EMI via [minecraft-web-export](htt
 
 ```text
 <exportRoot>/
-  guide-export/   manifest.json, meta.json, assets/, data/, lang/, assets/icons/ (planned)
+  guide-export/   manifest.json, meta.json, assets/, data/, lang/, assets/icons/, assets/entities/, index/
   emi/            scoped EMI bundle schema 2 (minecraft-web-export)
 ```
 

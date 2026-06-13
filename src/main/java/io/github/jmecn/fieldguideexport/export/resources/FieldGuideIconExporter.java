@@ -14,14 +14,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Writes handbook item icons to {@code guide-export/assets/icons/} using minecraft-web-export's
+ * Writes field-guide item icons to {@code guide-export/assets/icons/} using minecraft-web-export's
  * icon atlas builder (which normally targets {@code emi/icons}).
  */
-public final class HandbookIconExporter {
+public final class FieldGuideIconExporter {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");
 
-    private HandbookIconExporter() {}
+    private FieldGuideIconExporter() {}
 
     public static ItemIconRendererExporter.Result export(
             Path iconsRoot,
@@ -47,7 +47,8 @@ public final class HandbookIconExporter {
             }
             Files.createDirectories(iconsRoot.getParent());
             FileUtils.copyDirectory(emiIcons.toFile(), iconsRoot.toFile());
-            LOGGER.info("Copied handbook icon atlas to {}", iconsRoot.toAbsolutePath());
+            FieldGuideIconCss.rewriteExportedCss(iconsRoot);
+            LOGGER.info("Copied field-guide icon atlas to {}", iconsRoot.toAbsolutePath());
             return result;
         } finally {
             deleteRecursive(tempRoot);

@@ -1,6 +1,9 @@
 package io.github.jmecn.fieldguideexport.export.scan;
 
+import io.github.jmecn.fieldguideexport.export.entity.EntityRenderRequest;
+
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -64,8 +67,14 @@ public final class BookScanResult {
      */
     private final Set<String> textures = new TreeSet<>();
 
-    /** Entity ids referenced by {@code patchouli:entity} pages. */
+    /** Entity ids referenced by {@code patchouli:entity} pages (registry id or full NBT string). */
     private final Set<String> entities = new TreeSet<>();
+
+    /**
+     * Unique entity page compositions ({@code entity + scale + offset + default_rotation})
+     * for {@code EntityPreviewExporter}.
+     */
+    private final LinkedHashMap<EntityRenderRequest, EntityRenderRequest> entityRenderRequests = new LinkedHashMap<>();
 
     /**
      * Multiblock ids referenced by {@code patchouli:multiblock} (when {@code multiblock} is
@@ -155,6 +164,11 @@ public final class BookScanResult {
         return entities;
     }
 
+    /** De-duplicated entity render jobs in book encounter order. */
+    public List<EntityRenderRequest> getEntityRenderRequests() {
+        return List.copyOf(entityRenderRequests.keySet());
+    }
+
     public Set<String> getMultiblocks() {
         return multiblocks;
     }
@@ -215,6 +229,11 @@ public final class BookScanResult {
         entities.add(entityId);
     }
 
+    void addEntityRenderRequest(EntityRenderRequest request) {
+        entityRenderRequests.putIfAbsent(request, request);
+        entities.add(request.entity());
+    }
+
     void addMultiblock(String multiblockId) {
         multiblocks.add(multiblockId);
     }
@@ -244,6 +263,7 @@ public final class BookScanResult {
         stats.put("tags", tags.size());
         stats.put("textures", textures.size());
         stats.put("entities", entities.size());
+        stats.put("entityRenderRequests", entityRenderRequests.size());
         stats.put("multiblocks", multiblocks.size());
         stats.put("models", models.size());
         stats.put("blockstateRefs", blockstateRefs.size());

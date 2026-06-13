@@ -3,6 +3,7 @@ package io.github.jmecn.fieldguideexport.export.scan;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.jmecn.fieldguideexport.export.entity.EntityRenderRequest;
 import io.github.jmecn.fieldguideexport.export.patchouli.Book;
 import io.github.jmecn.fieldguideexport.export.patchouli.BookCategory;
 import io.github.jmecn.fieldguideexport.export.patchouli.BookEntry;
@@ -110,9 +111,9 @@ public final class BookScanner {
         }
 
         if ("patchouli:entity".equals(type)) {
-            String entity = optString(raw, "entity");
-            if (entity != null) {
-                result.addEntity(entity);
+            EntityRenderRequest request = EntityRenderRequest.fromPageJson(raw);
+            if (request != null) {
+                result.addEntityRenderRequest(request);
             }
         }
 

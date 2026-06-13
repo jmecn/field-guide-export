@@ -6,7 +6,9 @@ import io.github.jmecn.fieldguideexport.export.patchouli.Book;
 import io.github.jmecn.fieldguideexport.export.patchouli.BookCategory;
 import io.github.jmecn.fieldguideexport.export.patchouli.BookEntry;
 import io.github.jmecn.fieldguideexport.export.patchouli.PatchouliBookLoader;
+import io.github.jmecn.fieldguideexport.export.entity.EntityRenderMaps;
 import io.github.jmecn.fieldguideexport.export.resources.ClosureResourceExporter;
+import io.github.jmecn.fieldguideexport.export.resources.EntityPreviewExporter;
 import io.github.jmecn.fieldguideexport.export.resources.ExportDirectoryStats;
 import io.github.jmecn.fieldguideexport.export.resources.HandbookTagMembersExporter;
 import io.github.jmecn.fieldguideexport.export.scan.BlockStateExportMaps;
@@ -76,6 +78,77 @@ public final class GuideExportOrchestrator {
                     remapped);
         } catch (IOException e) {
             LOGGER.error("[recipe-mount] failed to patch {}", metaFile.toAbsolutePath(), e);
+        }
+    }
+
+    /**
+     * Patches {@code meta.json} after {@link io.github.jmecn.fieldguideexport.export.resources.EntityPreviewExporter}
+     * runs in {@code exportExtras} (meta is written earlier in {@link #run}).
+     */
+    public static void patchEntityRenders(Path guideDir, EntityPreviewExporter.Result result) {
+        if (guideDir == null || result == null || result.requested() == 0) {
+            return;
+        }
+        Path metaFile = guideDir.resolve("meta.json");
+        if (!Files.isRegularFile(metaFile)) {
+            LOGGER.warn("[entity-export] meta.json missing — cannot patch entityRenders");
+            return;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> meta = GSON.fromJson(Files.readString(metaFile), Map.class);
+            if (meta == null) {
+                return;
+            }
+            meta.put("schemaVersion", "1.4");
+
+            List<Map<String, Object>> renders = new ArrayList<>();
+            for (EntityPreviewExporter.RenderedEntity row : result.renders()) {
+                renders.add(EntityRenderMaps.toRenderMap(row));
+            }
+            if (!renders.isEmpty()) {
+                meta.put("entityRenders", renders);
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> stats = (Map<String, Object>) meta.computeIfAbsent("stats", k -> new LinkedHashMap<>());
+            stats.put("entityRenderRequested", result.requested());
+            stats.put("entityRenderSucceeded", result.succeeded());
+            stats.put("entityRenderFailed", result.failed());
+            stats.put("entityRenderBytes", result.bytes());
+
+            if (!result.failures().isEmpty()) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> missing = (Map<String, Object>) meta.computeIfAbsent("missing", k -> new LinkedHashMap<>());
+                List<Map<String, Object>> missingEntities = new ArrayList<>();
+                for (EntityPreviewExporter.FailedEntity failure : result.failures()) {
+                    missingEntities.add(EntityRenderMaps.toMissingMap(failure.request(), failure.error()));
+                }
+                missing.put("entities", missingEntities);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> missingStats = (Map<String, Object>) missing.computeIfAbsent("stats", k -> new LinkedHashMap<>());
+                missingStats.put("entities", missingEntities.size());
+                int total = 0;
+                Object blockstates = missingStats.get("blockstates");
+                Object multiblocks = missingStats.get("multiblocks");
+                if (blockstates instanceof Number n) {
+                    total += n.intValue();
+                }
+                if (multiblocks instanceof Number n) {
+                    total += n.intValue();
+                }
+                total += missingEntities.size();
+                missingStats.put("total", total);
+                stats.put("missingEntities", missingEntities.size());
+            }
+
+            Files.writeString(metaFile, GSON.toJson(meta));
+            LOGGER.info(
+                    "[entity-export] patched meta.json: {} renders, {} missing",
+                    result.succeeded(),
+                    result.failed());
+        } catch (IOException e) {
+            LOGGER.error("[entity-export] failed to patch {}", metaFile.toAbsolutePath(), e);
         }
     }
 
