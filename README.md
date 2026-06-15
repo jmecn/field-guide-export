@@ -33,7 +33,7 @@ In-game: `/fieldguideexport run`. Guide-only: `-Dfieldguide.exportEmi=false`.
 Install **field-guide-export** + **minecraft-web-export** jars. Headless export:
 
 ```text
--DminecraftWebExport.runExportAndExit=true
+-DminecraftWebExport.export.enabled=true
 -DminecraftWebExport.export.outputDir=<exportRoot>
 -DminecraftWebExport.exportMode=scoped
 ```

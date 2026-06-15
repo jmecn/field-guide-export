@@ -1,0 +1,8 @@
+# Minecraft Web Export — field guide CI (scoped EMI)
+[export]
+enabled = true
+outputDir = "build/export"
+mode = "scoped"
+
+[ci]
+worldName = "emi-export"

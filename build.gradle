@@ -18,6 +18,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         name = 'MinecraftForge'
@@ -63,6 +64,12 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.register('prepareExportCiClientConfig', Copy) {
+    from project.file('gradle/config/export-ci-client.toml')
+    into project.file('run/config')
+    rename { 'minecraft_web_export-client.toml' }
+}
+
 legacyForge {
     version = "${minecraft_version}-${forge_version}"
 
@@ -90,14 +97,8 @@ legacyForge {
         exportCiClient {
             client()
             ideName = 'Export CI Client'
-            systemProperty 'minecraftWebExport.runExportAndExit', 'true'
-            systemProperty 'minecraftWebExport.export.outputDir', 'build/export'
-            systemProperty 'minecraftWebExport.exportWorldName', 'emi-export'
-            systemProperty 'minecraftWebExport.exportMode', 'scoped'
-            systemProperty 'minecraftWebExport.export.enabled', 'true'
-            systemProperty 'minecraftWebExport.exportWarmupTicks', '100'
-            systemProperty 'minecraftWebExport.exportWorldDelayTicks', '60'
-            systemProperty 'minecraftWebExport.exportTimeoutSeconds', '7200'
+            systemProperty 'fieldguide.exportFolder', 'build/guide-export'
+            taskBefore tasks.named('prepareExportCiClientConfig')
         }
     }
 }
