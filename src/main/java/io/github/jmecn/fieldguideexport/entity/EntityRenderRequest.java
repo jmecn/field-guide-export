@@ -4,11 +4,6 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
-/**
- * One unique {@code patchouli:entity} page composition to export as a PNG.
- * Dedup key: full {@link #entity} string plus {@link #scale}, {@link #offset},
- * {@link #defaultRotation} (aligned with Patchouli {@code PageEntity} defaults).
- */
 public record EntityRenderRequest(
         String entity,
         float scale,
@@ -26,10 +21,6 @@ public record EntityRenderRequest(
         }
     }
 
-    /**
-     * Parses a {@code patchouli:entity} page JSON object. Returns {@code null} when
-     * {@code entity} is missing or blank.
-     */
     public static EntityRenderRequest fromPageJson(JsonObject raw) {
         if (raw == null) {
             return null;
@@ -44,7 +35,6 @@ public record EntityRenderRequest(
         return new EntityRenderRequest(entity, scale, offset, rotation);
     }
 
-    /** Registry id portion before optional {@code {nbt...}} suffix. */
     public String registryId() {
         int brace = entity.indexOf('{');
         return brace > 0 ? entity.substring(0, brace) : entity;

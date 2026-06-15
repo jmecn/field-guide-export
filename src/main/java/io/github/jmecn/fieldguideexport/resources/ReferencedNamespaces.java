@@ -6,7 +6,6 @@ import io.github.jmecn.fieldguideexport.scan.BookScanResult;
 import java.util.Set;
 import java.util.TreeSet;
 
-/** Namespaces touched by a Patchouli book scan (for filtered lang merge). */
 public final class ReferencedNamespaces {
 
     private ReferencedNamespaces() {}
@@ -41,7 +40,6 @@ public final class ReferencedNamespaces {
         return ns;
     }
 
-    /** Ensures namespaces referenced by collected lang keys (e.g. {@code item.gtceu.foo}) are included. */
     private static void addFromLangKeys(Set<String> ns, Iterable<String> langKeys) {
         for (String key : langKeys) {
             if (key == null || key.isBlank()) {

@@ -9,7 +9,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Summarizes on-disk size of {@code guide-export/} for manifest stats. */
 public final class ExportDirectoryStats {
 
     private ExportDirectoryStats() {}

@@ -31,19 +31,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
-/**
- * Resolves Patchouli {@code multiblock_id} references against the live game — something the
- * CLI cannot do when mods register structures in code (TFC bloomery, firmalife greenhouse, …).
- *
- * <p>Resolution order:</p>
- * <ol>
- *   <li>{@link MultiblockRegistry#MULTIBLOCKS} (populated after mods' {@code registerMultiBlocks()}).</li>
- *   <li>Optional JSON under {@code assets/<ns>/patchouli_books/<book>/multiblocks/<path>.json}.</li>
- * </ol>
- *
- * <p>For each structure, unique pattern-mapping characters are turned into blockstate snapshots
- * via {@link IMultiblock#simulate} and {@link BlockStateResolver#resolveFromBlockState}.</p>
- */
 public final class PatchouliMultiblockExporter {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide");
@@ -56,13 +43,11 @@ public final class PatchouliMultiblockExporter {
         public final String id;
         public String source;
         public String error;
-        /** Pattern char → blockstate export ({@code ref}, optional {@code override}). */
+        
         public final Map<String, Map<String, Object>> mapping = new LinkedHashMap<>();
-        /** De-duplicated blockstates used by this structure (for CLI variant lookup). */
+        
         public final List<Map<String, Object>> blockstates = new ArrayList<>();
-        /**
-         * Patchouli dense pattern: outer list = Y layers; each layer = Z rows; each row = X chars.
-         */
+        
         public final List<List<String>> pattern = new ArrayList<>();
 
         ExportedMultiblock(String id) {
@@ -225,9 +210,6 @@ public final class PatchouliMultiblockExporter {
         }
     }
 
-    /**
-     * Reconstruct a dense Patchouli pattern from simulate() layout (for registry sparse structures).
-     */
     private static void buildPatternFromSimulate(
             Pair<BlockPos, Collection<IMultiblock.SimulateResult>> sim,
             ExportedMultiblock result) {

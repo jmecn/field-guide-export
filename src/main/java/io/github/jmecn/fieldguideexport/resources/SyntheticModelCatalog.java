@@ -7,10 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Fallback JSON for model parents that exist only as client builtins (no pack file), e.g.
- * {@code minecraft:builtin/generated} or {@code forge:item/default}.
- */
 final class SyntheticModelCatalog {
 
     private static final Map<ResourceLocation, String> MODELS = new LinkedHashMap<>();

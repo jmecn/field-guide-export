@@ -18,12 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Exports {@code patchouli:entity} page previews to {@code assets/entities/} and returns
- * entries for {@code meta.json} {@code entityRenders} map (key = entity id).
- *
- * <p>Composition aligns with Patchouli {@code PageEntity}; frame size defaults to 256×256.</p>
- */
 public final class EntityPreviewExporter {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");

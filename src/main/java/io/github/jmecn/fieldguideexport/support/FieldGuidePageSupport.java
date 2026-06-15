@@ -4,10 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Declared support level for Patchouli page types used in the TFG field guide.
- * Written into {@code meta.json} during forge export.
- */
 public final class FieldGuidePageSupport {
 
     public enum Tier {

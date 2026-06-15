@@ -1,13 +1,9 @@
 package io.github.jmecn.fieldguideexport.icons;
 
-/** Normalizes Patchouli icon / item-stack strings to registry ids. */
 public final class IconStackIds {
 
     private IconStackIds() {}
 
-    /**
-     * @return registry id, {@code null} for blank, tag-only ({@code #tag}), or unparseable input
-     */
     public static String toItemId(String icon) {
         if (icon == null || icon.isBlank()) {
             return null;
@@ -39,7 +35,6 @@ public final class IconStackIds {
         return icon != null && icon.endsWith(".png");
     }
 
-    /** {@code namespace:path/to.png} → {@code assets/namespace/path/to.png} under guide-export. */
     public static String textureAssetRelativePath(String icon) {
         if (!isTextureIcon(icon)) {
             return null;

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/** Renames MWE {@code .icon-atlas} selectors so field-guide sprites do not collide with EMI. */
 public final class FieldGuideIconCss {
 
     public static final String FIELD_GUIDE_ICON_CSS_CLASS = "field-guide-icon-atlas";

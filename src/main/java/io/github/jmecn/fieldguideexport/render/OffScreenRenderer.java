@@ -14,11 +14,6 @@ import org.lwjgl.opengl.GL12;
 
 import java.io.IOException;
 
-/**
- * Off-screen framebuffer capture for field-guide entity previews.
- * Entity pages use {@link #setupGuiEntityRendering(int, int)} (256×256 GUI ortho), not
- * {@code setupItemRendering()} (16×16 item slot), or exported PNGs render fully transparent.
- */
 public final class OffScreenRenderer implements AutoCloseable {
 
     private final NativeImage nativeImage;
@@ -57,10 +52,6 @@ public final class OffScreenRenderer implements AutoCloseable {
         }
     }
 
-    /**
-     * Patchouli {@code PageEntity} / inventory-style entity preview projection for the given
-     * framebuffer size (typically 256×256).
-     */
     public void setupGuiEntityRendering(int logicalWidth, int logicalHeight) {
         setupOrtho(logicalWidth, logicalHeight);
         Lighting.setupForEntityInInventory();

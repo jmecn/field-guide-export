@@ -5,12 +5,10 @@ import io.github.jmecn.fieldguideexport.resources.EntityPreviewExporter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Serializes entity render records to {@code meta.json} maps. */
 public final class EntityRenderMaps {
 
     private EntityRenderMaps() {}
 
-    /** Value for {@code meta.json} {@code entityRenders.<entityId>} (key is the full entity id). */
     public static Map<String, Object> toRenderEntry(EntityPreviewExporter.RenderedEntity rendered) {
         Map<String, Object> row = new LinkedHashMap<>();
         EntityRenderRequest req = rendered.request();

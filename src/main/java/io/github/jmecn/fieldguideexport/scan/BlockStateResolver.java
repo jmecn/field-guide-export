@@ -12,38 +12,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-/**
- * Resolves Patchouli {@code mapping} strings (a partial blockstate reference such as
- * {@code "minecraft:oak_log[axis=y]"}) against the live block registry to obtain a
- * <b>complete</b> property snapshot.
- *
- * <p>The CLI cannot do this on its own: it only sees the manual's raw string, which is
- * usually a partial state — the rest of the properties are inherited from
- * {@link Block#defaultBlockState()}. By running inside the client we have access to
- * {@link ForgeRegistries#BLOCKS} and the block's {@code StateDefinition}, so we can return:
- *
- * <ul>
- *   <li>{@link Resolved#ref} — the string as it appears in the Patchouli book.</li>
- *   <li>{@link Resolved#override} — canonical runtime blockstate (defaults applied), only when
- *       it differs from {@code ref}; omitted when the book already wrote the full state.</li>
- * </ul>
- *
- * <p>Special-cases:</p>
- * <ul>
- *   <li>{@code "#namespace:path"} → tag reference, not a blockstate. We record it without
- *       attempting to resolve a single state.</li>
- *   <li>Unparseable / unknown blocks / unknown property names → {@link Resolved#error} or
- *       {@link Resolved#unknownProperties}.</li>
- *   <li>{@link Resolved#invalidProperties} — property exists but the value string does not
- *       parse (wrong enum name, etc.). Values that match {@link Block#defaultBlockState()} are
- *       not flagged.</li>
- * </ul>
- */
 public final class BlockStateResolver {
 
     private BlockStateResolver() {}
 
-    /** Result for a single mapping string. Use {@link #isOk()} to gate downstream usage. */
     public static final class Resolved {
         public final String ref;
         public String kind;
@@ -53,10 +25,7 @@ public final class BlockStateResolver {
         public Map<String, String> unknownProperties;
         public Map<String, String> invalidProperties;
         public String error;
-        /**
-         * Runtime blockstate after applying {@link Block#defaultBlockState()} and any properties
-         * from {@code ref}. Omitted when identical to {@link #ref}.
-         */
+        
         public String override;
 
         Resolved(String ref) {
@@ -148,10 +117,6 @@ public final class BlockStateResolver {
         }
     }
 
-    /**
-     * Builds a Patchouli-style blockstate string from a live {@link BlockState} (as returned
-     * by {@code IStateMatcher#getDisplayedState} during multiblock export).
-     */
     public static String formatBlockStateRef(BlockState state) {
         ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(state.getBlock());
         if (blockId == null) {
@@ -175,7 +140,6 @@ public final class BlockStateResolver {
         return sb.toString();
     }
 
-    /** Snapshot of an in-world {@link BlockState} without re-parsing a book string. */
     public static Resolved resolveFromBlockState(BlockState state) {
         Resolved out = new Resolved(formatBlockStateRef(state));
         out.kind = "block";

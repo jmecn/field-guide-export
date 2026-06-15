@@ -8,11 +8,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Reads export locale codes from {@code -Dfieldguide.exportLanguages=...}.
- * The list is owned by <strong>Field-Guide-Modern</strong> ({@code Language} enum); CI sets this property
- * via {@code ./gradlew printExportLanguages} — this cmd does not define supported languages.
- */
 public final class FieldGuideExportLanguages {
 
     private static final Logger LOGGER = LogManager.getLogger(FieldGuideExportLanguages.class);
@@ -22,9 +17,6 @@ public final class FieldGuideExportLanguages {
     private FieldGuideExportLanguages() {
     }
 
-    /**
-     * @return configured locales, or {@code null} when property is {@code *} (all MC languages)
-     */
     public static Set<String> resolve() {
         String raw = System.getProperty(PROPERTY, "").trim();
         if (raw.isEmpty()) {

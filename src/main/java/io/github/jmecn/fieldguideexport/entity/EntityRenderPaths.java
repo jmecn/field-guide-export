@@ -5,18 +5,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-/**
- * Bundle-relative PNG paths for exported entity previews.
- */
 public final class EntityRenderPaths {
 
     private EntityRenderPaths() {}
 
-    /**
-     * {@code assets/entities/<namespace>/<path>.png} for plain ids;
-     * when NBT is present, {@code assets/entities/<namespace>/<path>/<hash>.png}
-     * so variants with different NBT do not overwrite each other.
-     */
     public static String relativePngPath(EntityRenderRequest request) {
         String registryId = request.registryId();
         int colon = registryId.indexOf(':');

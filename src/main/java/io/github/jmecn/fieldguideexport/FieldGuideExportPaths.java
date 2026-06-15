@@ -1,15 +1,8 @@
 package io.github.jmecn.fieldguideexport;
 import io.github.jmecn.minecraftwebexport.config.MweConfig;
 
-
 import java.nio.file.Path;
 
-/**
- * Layout: {@code <exportRoot>/guide-export/} + {@code <exportRoot>/emi/} (EMI via minecraft-web-export).
- *
- * <p>{@code -Dfieldguide.exportFolder=} overrides the guide directory (FGM CI compat).
- * {@code -Dfieldguide.exportRoot=} sets the parent when both trees are written.</p>
- */
 public final class FieldGuideExportPaths {
 
     public static final String GUIDE_SUBDIR = "guide-export";

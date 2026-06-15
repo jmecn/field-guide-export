@@ -13,10 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-/**
- * Entity preview draw path adapted from WikiZoomer {@code GuiEntityZoomer.drawEntityOnScreen}
- * (Alexthe666 / wiki-zoomer cmd in this repo).
- */
 public final class EntityWikiZoomerDraw {
 
     public static final float PITCH_DEGREES = 30f;

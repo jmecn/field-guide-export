@@ -32,14 +32,6 @@ public final class PatchouliBookLoader {
     private final String bookId;
     private final String language;
 
-    /**
-     * @param client    live client (provides the client-side ResourceManager for assets/)
-     * @param server    integrated server (provides the server-side ResourceManager for data/);
-     *                  may be {@code null} — book metadata is then skipped (logged once)
-     * @param namespace e.g. {@code tfc}
-     * @param bookId    e.g. {@code field_guide}
-     * @param language  e.g. {@code en_us}
-     */
     public PatchouliBookLoader(Minecraft client, MinecraftServer server,
                                String namespace, String bookId, String language) {
         this.client = client;
@@ -49,7 +41,6 @@ public final class PatchouliBookLoader {
         this.language = language;
     }
 
-    /** Convenience for the common TFC field_guide / en_us case. */
     public static PatchouliBookLoader forTfcFieldGuide(Minecraft client) {
         return new PatchouliBookLoader(client, client.getSingleplayerServer(),
                 "tfc", "field_guide", DEFAULT_LANGUAGE);
@@ -81,8 +72,8 @@ public final class PatchouliBookLoader {
         return book;
     }
 
-    @SuppressWarnings("removal") // ResourceLocation(ns, path) is the canonical 1.20.1 ctor;
-                                  // ResourceLocation.fromNamespaceAndPath only exists in 1.21+.
+    @SuppressWarnings("removal") 
+                                  
     private Book loadBookMetadata() {
         String bookJsonPath = "patchouli_books/" + bookId + "/book.json";
         ResourceLocation bookKey = new ResourceLocation(namespace, bookJsonPath);
@@ -193,11 +184,6 @@ public final class PatchouliBookLoader {
         return added;
     }
 
-    /**
-     * Re-read the entry JSON to attach the raw {@link JsonObject} of each page (Gson at this
-     * level deserialized into {@link BookPage} fields only). One I/O per entry is fine for now;
-     * we can stream-parse later if it becomes a bottleneck.
-     */
     private void attachRawPageJson(BookEntry entry, Resource res, ResourceLocation loc) {
         if (entry.getPages().isEmpty()) {
             return;

@@ -23,11 +23,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 
-/**
- * Merges per-cmd {@code assets/&lt;ns&gt;/lang/&lt;lang&gt;.json} into export {@code lang/&lt;lang&gt;.json}
- * (handbook: {@code guide-export/lang/}; EMI bundle: {@code emi/lang/}).
- * (MC-style keys, same as CLI {@code AssetLoader#loadLang} + {@code putAll}).
- */
 public final class HandbookLangExporter {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");
@@ -52,21 +47,15 @@ public final class HandbookLangExporter {
         return export(outputDir, client, null, null);
     }
 
-    /** Writes merged lang files under {@code guide-export/lang/} (full merge). */
     public static Result exportHandbookLang(Path outputDir, Minecraft client) throws IOException {
         return exportHandbookLang(outputDir, client, null, null);
     }
 
-    /** Writes merged lang files under {@code guide-export/lang/}. */
     public static Result exportHandbookLang(Path outputDir, Minecraft client, Set<String> onlyNamespaces, Set<String> onlyKeys)
             throws IOException {
         return exportTo(outputDir.resolve("lang"), client, onlyNamespaces, onlyKeys);
     }
 
-    /**
-     * @param onlyNamespaces when non-null, only read lang files from these cmd namespaces.
-     * @param onlyKeys when non-null, only keep these translation keys; {@code null} = full merge.
-     */
     public static Result export(Path outputDir, Minecraft client, Set<String> onlyNamespaces, Set<String> onlyKeys)
             throws IOException {
         return exportHandbookLang(outputDir, client, onlyNamespaces, onlyKeys);
@@ -150,10 +139,6 @@ public final class HandbookLangExporter {
                 keysPerLanguage);
     }
 
-    /**
-     * Forge 1.20.1 {@link ResourceManager#listResources(String, Predicate)} uses paths like
-     * {@code lang/en_us.json} (same as {@code recipes/…} under {@code listResources("recipes")}).
-     */
     private static boolean matchesLangPath(ResourceLocation loc, String langFile) {
         String path = loc.getPath();
         return path.equals(langFile) || path.equals("lang/" + langFile) || path.endsWith("/" + langFile);
@@ -185,7 +170,6 @@ public final class HandbookLangExporter {
         }
     }
 
-    /** One-line hint when zero files match (wrong path filter vs missing reload). */
     private static void logLangPathProbe(Minecraft client, String langFile) {
         int shown = 0;
         StringBuilder sample = new StringBuilder();

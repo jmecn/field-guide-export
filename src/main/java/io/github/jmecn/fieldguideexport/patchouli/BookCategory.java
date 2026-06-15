@@ -5,13 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * One Patchouli category, loaded from
- * {@code assets/<ns>/patchouli_books/<book>/<lang>/categories/<id>.json}.
- *
- * <p>The {@link #id} field is path-derived (not part of the JSON itself); the loader fills
- * it after deserialization.</p>
- */
 public class BookCategory implements Comparable<BookCategory> {
 
     @SerializedName("name")
@@ -35,7 +28,6 @@ public class BookCategory implements Comparable<BookCategory> {
     @SerializedName("secret")
     private boolean secret = false;
 
-    /** Path-derived id (no namespace, no extension), e.g. {@code getting_started}. */
     private transient String id;
     private transient AssetSource assetSource = AssetSource.UNKNOWN;
     private transient final List<BookEntry> entries = new ArrayList<>();

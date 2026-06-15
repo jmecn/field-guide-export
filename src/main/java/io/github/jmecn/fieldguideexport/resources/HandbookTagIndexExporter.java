@@ -21,10 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * Writes {@code index/tag-members.json} for offline site / CLI tag expansion
- * ({@code BlockstateRefResolver}, {@code ExportModelLoader#loadBlockTag}).
- */
 public final class HandbookTagIndexExporter {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");

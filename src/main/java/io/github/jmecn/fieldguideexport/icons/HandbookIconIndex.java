@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-/** Reads {@code assets/icons/index.json} produced by field-guide icon export. */
 public final class HandbookIconIndex {
 
     private static final Gson GSON = new Gson();

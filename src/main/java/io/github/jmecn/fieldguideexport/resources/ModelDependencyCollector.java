@@ -6,11 +6,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.Set;
 
-/**
- * Seeds resource export from handbook refs. Block ids enqueue the full {@code blockstates/*.json}
- * (all variants) plus the fallback {@code models/block/*.json}; {@link ModelDependencyWalker}
- * pulls every variant model, parent chain, and textures while writing.
- */
 @SuppressWarnings("removal")
 final class ModelDependencyCollector {
 
@@ -73,7 +68,7 @@ final class ModelDependencyCollector {
         }
         String ref = textureRef;
         if (ref.endsWith(".png") || ref.endsWith(".mcmeta")) {
-            // strip extension for ResourceLocation path under textures/
+            
             if (ref.endsWith(".mcmeta")) {
                 ref = ref.substring(0, ref.length() - ".mcmeta".length());
             } else if (ref.endsWith(".png")) {

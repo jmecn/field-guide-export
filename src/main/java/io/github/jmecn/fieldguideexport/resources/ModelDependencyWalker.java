@@ -15,9 +15,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Walks blockstate / model JSON and enqueues dependent models, parents, and textures
- */
 @SuppressWarnings("removal")
 final class ModelDependencyWalker {
 
@@ -32,7 +29,7 @@ final class ModelDependencyWalker {
         try (var reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
             walkBlockstateJson(rm, blockstateId.getNamespace(), JsonParser.parseReader(reader).getAsJsonObject(), pending, written);
         } catch (Exception ignored) {
-            // blockstate parse failures are non-fatal; the JSON file itself is still exported
+            
         }
     }
 
@@ -45,7 +42,7 @@ final class ModelDependencyWalker {
         try (var reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
             enqueueModelDependenciesFromJson(rm, modelId, JsonParser.parseReader(reader).getAsJsonObject(), pending, written);
         } catch (Exception ignored) {
-            // model parse failures are non-fatal
+            
         }
     }
 

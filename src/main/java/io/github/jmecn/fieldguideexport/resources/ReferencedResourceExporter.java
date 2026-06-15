@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Writes runtime resources reachable from a {@link BookScanResult}.
- */
 @SuppressWarnings("removal")
 public final class ReferencedResourceExporter {
 

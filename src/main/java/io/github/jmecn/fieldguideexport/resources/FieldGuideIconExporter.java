@@ -15,10 +15,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Writes field-guide item icons to {@code guide-export/assets/icons/} using minecraft-web-export's
- * icon atlas builder (which normally targets {@code emi/icons}).
- */
 public final class FieldGuideIconExporter {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");
@@ -34,8 +30,7 @@ public final class FieldGuideIconExporter {
         Path tempRoot = Files.createTempDirectory("field-guide-export-icons");
         try {
             int sprites;
-            // Handbook icons must land on disk for copy into guide-export/assets/icons/.
-            // MWE default exportCompressed() writes emi.zip only — no emi/icons/ directory.
+            
             try (ExportWriteQueue writes = ExportWriteQueue.create(tempRoot, false)) {
                 sprites = ItemIconWriter.export(
                         tempRoot, client, onlyItemIds, Set.of(), usageWeights, Map.of(), writes);

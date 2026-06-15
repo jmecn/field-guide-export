@@ -12,10 +12,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-/**
- * In-game combined export: {@link Pipeline} runs {@code guide-export/} via
- * {@link FieldGuideExportModule#beforeEmiExport} then scoped EMI under {@code emi/}.
- */
 public final class FieldGuideExportPipeline {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");

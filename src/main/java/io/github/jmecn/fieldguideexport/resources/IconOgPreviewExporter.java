@@ -15,10 +15,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Crops per-entry Open Graph preview PNGs from the handbook icon atlas (or book textures).
- * Output: {@code assets/icons/og/<entryId>.png} (256×256).
- */
 public final class IconOgPreviewExporter {
 
     private static final Logger LOGGER = Logger.getLogger("fieldguide-export");

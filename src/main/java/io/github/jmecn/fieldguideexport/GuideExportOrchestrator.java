@@ -36,10 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Guide-export pipeline: Patchouli book scan, {@code manifest.json} / {@code meta.json},
- * and book-referenced {@code assets/} + {@code data/} resources.
- */
 public final class GuideExportOrchestrator {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");
@@ -47,10 +43,6 @@ public final class GuideExportOrchestrator {
 
     private GuideExportOrchestrator() {}
 
-    /**
-     * Updates {@code refs.recipeMountIds} after {@link RecipeOverrideResolver}
-     * runs (meta is written earlier in {@link #run} before EMI is available).
-     */
     public static void patchRecipeMountIds(Path guideDir, BookScanResult scan) {
         if (guideDir == null || scan == null) {
             return;
@@ -83,10 +75,6 @@ public final class GuideExportOrchestrator {
         }
     }
 
-    /**
-     * Patches {@code meta.json} after {@link io.github.jmecn.fieldguideexport.resources.EntityPreviewExporter}
-     * runs in {@code exportExtras} (meta is written earlier in {@link #run}).
-     */
     public static void patchEntityRenders(Path guideDir, EntityPreviewExporter.Result result) {
         if (guideDir == null || result == null || result.requested() == 0) {
             return;
@@ -158,7 +146,6 @@ public final class GuideExportOrchestrator {
         }
     }
 
-    /** Patches {@code meta.json} with per-entry OG preview paths after {@link IconOgPreviewExporter}. */
     public static void patchEntryOgImages(Path guideDir, IconOgPreviewExporter.Result result) {
         if (guideDir == null || result == null || result.paths().isEmpty()) {
             return;

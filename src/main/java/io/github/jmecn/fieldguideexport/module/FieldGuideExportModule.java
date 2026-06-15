@@ -23,9 +23,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Supplies Patchouli book scan seeds to minecraft-web-export scoped EMI export.
- */
 public final class FieldGuideExportModule implements Module {
 
     private static final Logger LOGGER = LogManager.getLogger("fieldguide-export");

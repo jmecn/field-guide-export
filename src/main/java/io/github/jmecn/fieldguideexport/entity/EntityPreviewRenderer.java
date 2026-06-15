@@ -9,10 +9,6 @@ import vazkii.patchouli.common.util.EntityUtil;
 
 import java.util.function.Function;
 
-/**
- * Off-screen entity export: Patchouli entity loading + WikiZoomer draw path
- * ({@link EntityWikiZoomerDraw}).
- */
 public final class EntityPreviewRenderer {
 
     private EntityPreviewRenderer() {}

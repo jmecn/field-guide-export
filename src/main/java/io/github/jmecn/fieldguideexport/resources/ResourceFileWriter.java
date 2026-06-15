@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-/** Writes a single pack resource into {@code assets/} or {@code data/} mirror layout. */
 final class ResourceFileWriter {
 
     private ResourceFileWriter() {}

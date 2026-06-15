@@ -3,7 +3,6 @@ package io.github.jmecn.fieldguideexport.scan;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Shared JSON shape for {@link BlockStateResolver.Resolved} in export files. */
 public final class BlockStateExportMaps {
 
     private BlockStateExportMaps() {}
