@@ -51,6 +51,7 @@ public final class ReferencedResourceExporter {
         Path dataRoot = outputDir.resolve("data");
 
         ResourceManager clientRm = client.getResourceManager();
+        MinecraftServer server = client.getSingleplayerServer();
         Set<String> excluded = ResourceExportFilter.excludedNamespaces();
 
         Set<ResourceLocation> queue = new LinkedHashSet<>();
@@ -71,20 +72,16 @@ public final class ReferencedResourceExporter {
         }
         if (blockstates != null) {
             for (BlockStateResolver.Resolved r : blockstates) {
-                if (r.block != null) {
-                    ModelDependencyCollector.seedBlockId(clientRm, r.block, queue);
-                } else if (r.ref != null && !r.ref.startsWith("#")) {
-                    ModelDependencyCollector.seedBlockId(clientRm, r.ref, queue);
-                }
+                BlockstateRefSeeder.seedResolved(clientRm, r, queue, server);
             }
         }
         if (multiblockDefs != null) {
             for (PatchouliMultiblockExporter.ExportedMultiblock mb : multiblockDefs) {
                 for (Map<String, Object> state : mb.blockstates) {
-                    seedBlockstateMap(clientRm, state, queue);
+                    BlockstateRefSeeder.seedBlockstateMap(clientRm, state, queue, server);
                 }
                 for (Map<String, Object> mapped : mb.mapping.values()) {
-                    seedBlockstateMap(clientRm, mapped, queue);
+                    BlockstateRefSeeder.seedBlockstateMap(clientRm, mapped, queue, server);
                 }
             }
         }
@@ -94,7 +91,6 @@ public final class ReferencedResourceExporter {
 
         ExportCounters data = new ExportCounters();
         boolean serverSkipped = false;
-        MinecraftServer server = client.getSingleplayerServer();
         if (server == null) {
             LOGGER.warn("[resources] no integrated server — skipping data/ export");
             serverSkipped = true;
@@ -103,11 +99,7 @@ public final class ReferencedResourceExporter {
             Set<ResourceLocation> dataQueue = new LinkedHashSet<>();
             seedPatchouliBooks(serverRm, book.getNamespace(), dataQueue);
             for (BlockStateResolver.Resolved r : blockstates != null ? blockstates : List.<BlockStateResolver.Resolved>of()) {
-                if (r.block != null) {
-                    ModelDependencyCollector.seedBlockId(serverRm, r.block, dataQueue);
-                } else if (r.ref != null && !r.ref.startsWith("#")) {
-                    ModelDependencyCollector.seedBlockId(serverRm, r.ref, dataQueue);
-                }
+                BlockstateRefSeeder.seedResolved(serverRm, r, dataQueue, server);
             }
             if (extraBlockIds != null) {
                 for (String blockId : extraBlockIds) {
@@ -117,7 +109,7 @@ public final class ReferencedResourceExporter {
             if (multiblockDefs != null) {
                 for (PatchouliMultiblockExporter.ExportedMultiblock mb : multiblockDefs) {
                     for (Map<String, Object> state : mb.blockstates) {
-                        seedBlockstateMap(serverRm, state, dataQueue);
+                        BlockstateRefSeeder.seedBlockstateMap(serverRm, state, dataQueue, server);
                     }
                 }
             }
@@ -135,21 +127,6 @@ public final class ReferencedResourceExporter {
                 serverSkipped,
                 seeded,
                 assets.written + data.written);
-    }
-
-    private static void seedBlockstateMap(
-            ResourceManager rm, Map<String, Object> stateMap, Set<ResourceLocation> queue) {
-        if (stateMap == null) {
-            return;
-        }
-        Object ref = stateMap.get("ref");
-        if (ref instanceof String s) {
-            ModelDependencyCollector.seedBlockId(rm, s, queue);
-        }
-        Object override = stateMap.get("override");
-        if (override instanceof String s) {
-            ModelDependencyCollector.seedBlockId(rm, s, queue);
-        }
     }
 
     private static void seedPatchouliBooks(ResourceManager rm, String namespace, Set<ResourceLocation> queue) {
