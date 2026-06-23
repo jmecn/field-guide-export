@@ -7,7 +7,6 @@ public final class IconStackIds {
 
     private IconStackIds() {}
 
-    /** Splits Patchouli comma-separated item strings (respects braces/quotes). */
     public static String[] splitSerializedStacks(String ingredientSerialized) {
         if (ingredientSerialized == null || ingredientSerialized.isBlank()) {
             return new String[0];
