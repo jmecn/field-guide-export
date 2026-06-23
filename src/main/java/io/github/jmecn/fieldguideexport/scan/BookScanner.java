@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.jmecn.fieldguideexport.entity.EntityRenderRequest;
+import io.github.jmecn.fieldguideexport.icons.IconStackIds;
 import io.github.jmecn.fieldguideexport.patchouli.Book;
 import io.github.jmecn.fieldguideexport.patchouli.BookCategory;
 import io.github.jmecn.fieldguideexport.patchouli.BookEntry;
@@ -177,12 +178,26 @@ public final class BookScanner {
         if (itemStackString == null || itemStackString.isBlank()) {
             return;
         }
-        int hash = itemStackString.indexOf('#');
-        int brace = itemStackString.indexOf('{');
-        int cut = itemStackString.length();
+        for (String part : IconStackIds.splitSerializedStacks(itemStackString)) {
+            addSingleItemStackRef(result, part);
+        }
+    }
+
+    private static void addSingleItemStackRef(BookScanResult result, String itemStackString) {
+        String trimmed = itemStackString.trim();
+        if (trimmed.isEmpty()) {
+            return;
+        }
+        if (trimmed.startsWith("tag:")) {
+            result.addTag("#" + trimmed.substring(4).trim());
+            return;
+        }
+        int hash = trimmed.indexOf('#');
+        int brace = trimmed.indexOf('{');
+        int cut = trimmed.length();
         if (hash >= 0) cut = Math.min(cut, hash);
         if (brace >= 0) cut = Math.min(cut, brace);
-        String id = itemStackString.substring(0, cut).trim();
+        String id = trimmed.substring(0, cut).trim();
         if (!id.isEmpty()) {
             if (id.startsWith("#")) {
                 result.addTag(id);

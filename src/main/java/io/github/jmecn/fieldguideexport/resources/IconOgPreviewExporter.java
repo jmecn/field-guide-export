@@ -2,6 +2,7 @@ package io.github.jmecn.fieldguideexport.resources;
 
 import io.github.jmecn.fieldguideexport.icons.HandbookIconIndex;
 import io.github.jmecn.fieldguideexport.icons.IconStackIds;
+import io.github.jmecn.minecraftwebexport.Constants;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -20,7 +21,6 @@ public final class IconOgPreviewExporter {
     private static final Logger LOGGER = Logger.getLogger("fieldguide-export");
 
     public static final int OG_SIZE = 256;
-    public static final String MISSING_ITEM_ID = "fieldguide:missing_icon";
     private static final String OG_RELATIVE_PREFIX = "assets/icons/og/";
 
     private IconOgPreviewExporter() {}
@@ -89,7 +89,7 @@ public final class IconOgPreviewExporter {
             return null;
         }
         HandbookIconIndex.SpritePlacement placement =
-                index.findItem(itemId).or(() -> index.findItem(MISSING_ITEM_ID)).orElse(null);
+                index.findItem(itemId).or(() -> index.findItem(Constants.MISSING_ICON_REGISTRY_ID)).orElse(null);
         if (placement == null) {
             return null;
         }

@@ -24,4 +24,14 @@ class IconStackIdsTest {
     void tagIconReturnsNullItemId() {
         assertNull(IconStackIds.toItemId("#forge:ingots"));
     }
+
+    @Test
+    void splitSerializedStacksRespectsCommasAndBraces() {
+        assertArrayEquals(
+                new String[]{"tfc:ceramic/jug", "tfc:silica_glass_bottle"},
+                IconStackIds.splitSerializedStacks("tfc:ceramic/jug,tfc:silica_glass_bottle"));
+        assertArrayEquals(
+                new String[]{"minecraft:stick{CustomModelData:1}", "minecraft:stone"},
+                IconStackIds.splitSerializedStacks("minecraft:stick{CustomModelData:1},minecraft:stone"));
+    }
 }
