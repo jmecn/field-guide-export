@@ -26,10 +26,28 @@ public final class FieldGuidePageSupport {
         TFC_MODPACK_PAGES.put("tfc:quern_recipe", Tier.PARTIAL);
         TFC_MODPACK_PAGES.put("tfc:rock_knapping_recipe", Tier.PARTIAL);
         TFC_MODPACK_PAGES.put("tfc:sealed_barrel_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfc:smoking", Tier.PARTIAL);
         TFC_MODPACK_PAGES.put("tfc:sns/better_anvil_recipe", Tier.PARTIAL);
         TFC_MODPACK_PAGES.put("tfc:table", Tier.PARTIAL);
         TFC_MODPACK_PAGES.put("tfc:table_small", Tier.PARTIAL);
         TFC_MODPACK_PAGES.put("tfc:welding_recipe", Tier.PARTIAL);
+
+        TFC_MODPACK_PAGES.put("tfg:anvil_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:drying_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:glassworking_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:heat_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:instant_barrel_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:knapping_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:loom_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:multimultiblock", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:quern_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:rock_knapping_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:sealed_barrel_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:smoking", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:sns/better_anvil_recipe", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:table", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:table_small", Tier.PARTIAL);
+        TFC_MODPACK_PAGES.put("tfg:welding_recipe", Tier.PARTIAL);
     }
 
     private FieldGuidePageSupport() {}

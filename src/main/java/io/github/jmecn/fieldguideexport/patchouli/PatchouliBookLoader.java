@@ -3,6 +3,7 @@ package io.github.jmecn.fieldguideexport.patchouli;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.jmecn.fieldguideexport.FieldGuideExportProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -41,9 +42,11 @@ public final class PatchouliBookLoader {
         this.language = language;
     }
 
-    public static PatchouliBookLoader forTfcFieldGuide(Minecraft client) {
+    public static PatchouliBookLoader forConfiguredBook(Minecraft client) {
         return new PatchouliBookLoader(client, client.getSingleplayerServer(),
-                "tfc", "field_guide", DEFAULT_LANGUAGE);
+                FieldGuideExportProperties.bookNamespace(),
+                FieldGuideExportProperties.bookId(),
+                DEFAULT_LANGUAGE);
     }
 
     public Book load() {

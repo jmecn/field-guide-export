@@ -194,7 +194,7 @@ public final class GuideExportOrchestrator {
         List<PatchouliMultiblockExporter.ExportedMultiblock> multiblockDefs = null;
 
         try {
-            book = PatchouliBookLoader.forTfcFieldGuide(client).load();
+            book = PatchouliBookLoader.forConfiguredBook(client).load();
             manifest.put("book", summarizeBook(book));
 
             scanResult = BookScanner.scan(book);
@@ -263,7 +263,8 @@ public final class GuideExportOrchestrator {
         }
 
         if (scanResult != null) {
-            writeMeta(outputDir, scanResult, blockstates, multiblockDefs, resources);
+            writeMeta(outputDir, scanResult, blockstates, multiblockDefs, resources,
+                    book != null ? book.getNamespace() : null);
             exportTagIndex(outputDir, client, scanResult, blockstates, manifest);
         }
 
@@ -513,7 +514,8 @@ public final class GuideExportOrchestrator {
             BookScanResult scan,
             BlockStateResolution blockstates,
             List<PatchouliMultiblockExporter.ExportedMultiblock> multiblockDefs,
-            ReferencedResourceExporter.Result resources) {
+            ReferencedResourceExporter.Result resources,
+            String bookNamespace) {
         Map<String, Object> meta = new LinkedHashMap<>();
         meta.put("schemaVersion", "1.3");
         meta.put("scannedAt", Instant.now().toString());
@@ -531,7 +533,7 @@ public final class GuideExportOrchestrator {
             stats.put("dataExportSkipped", resources.serverSkipped());
         }
         meta.put("stats", stats);
-        meta.put("pageTypeSupport", buildPageTypeSupport(scan));
+        meta.put("pageTypeSupport", buildPageTypeSupport(scan, bookNamespace));
 
         Map<String, Object> refs = new LinkedHashMap<>();
         refs.put("recipes", scan.getRecipes());
@@ -594,14 +596,17 @@ public final class GuideExportOrchestrator {
         }
     }
 
-    private static Map<String, Object> buildPageTypeSupport(BookScanResult scan) {
+    private static Map<String, Object> buildPageTypeSupport(BookScanResult scan, String bookNamespace) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("catalog", FieldGuidePageSupport.exportCatalog());
 
+        String prefix = (bookNamespace == null || bookNamespace.isBlank())
+                ? "tfc:"
+                : bookNamespace + ":";
         Map<String, Integer> seen = scan.getPagesByType();
         List<Map<String, Object>> inBook = new ArrayList<>();
         for (Map.Entry<String, Integer> e : seen.entrySet()) {
-            if (!e.getKey().startsWith("tfc:")) {
+            if (!e.getKey().startsWith(prefix)) {
                 continue;
             }
             Map<String, Object> row = new LinkedHashMap<>();
@@ -610,7 +615,7 @@ public final class GuideExportOrchestrator {
             row.put("tier", FieldGuidePageSupport.tierOf(e.getKey()).name().toLowerCase());
             inBook.add(row);
         }
-        out.put("tfcPagesInBook", inBook);
+        out.put("modpackPagesInBook", inBook);
         return out;
     }
 
